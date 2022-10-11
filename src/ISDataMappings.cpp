@@ -164,10 +164,10 @@ static void PopulateSizeMappings(uint32_t sizeMap[DID_COUNT])
 	sizeMap[DID_SENSORS_MCAL] = sizeof(sensors_w_temp_t);
 	sizeMap[DID_SENSORS_TC_BIAS] = sizeof(sensors_t);
 	sizeMap[DID_SCOMP] = sizeof(sensor_compensation_t);
-    sizeMap[DID_RTK_DEBUG] = sizeof(rtk_debug_t);
+//    sizeMap[DID_RTK_DEBUG] = sizeof(rtk_debug_t);
 //     sizeMap[DID_RTK_STATE] = sizeof(rtk_state_t);
-    sizeMap[DID_RTK_CODE_RESIDUAL] = sizeof(rtk_residual_t);
-    sizeMap[DID_RTK_PHASE_RESIDUAL] = sizeof(rtk_residual_t);
+//    sizeMap[DID_RTK_CODE_RESIDUAL] = sizeof(rtk_residual_t);
+//    sizeMap[DID_RTK_PHASE_RESIDUAL] = sizeof(rtk_residual_t);
 	sizeMap[DID_NVR_USERPAGE_G0] = sizeof(nvm_group_0_t);
 	sizeMap[DID_NVR_USERPAGE_G1] = sizeof(nvm_group_1_t);
 	sizeMap[DID_INL2_STATES] = sizeof(inl2_states_t);
@@ -177,7 +177,7 @@ static void PopulateSizeMappings(uint32_t sizeMap[DID_COUNT])
 	sizeMap[DID_IMU_MAG] = sizeof(imu_mag_t);
 	sizeMap[DID_PIMU_MAG] = sizeof(pimu_mag_t);
 	sizeMap[DID_SENSORS_ADC] = sizeof(sys_sensors_adc_t);
-	sizeMap[DID_RTK_DEBUG_2] = sizeof(rtk_debug_2_t);
+//	sizeMap[DID_RTK_DEBUG_2] = sizeof(rtk_debug_2_t);
 
 #endif
 
@@ -2018,6 +2018,7 @@ static void PopulateInl2StatesMappings(map_name_to_info_t mappings[DID_COUNT])
 //     ADD_MAP(m, totalSize, "bv[2]", bv_ecef[2], 0, DataTypeDouble, double&, 0);
 // }
 
+#if 0
 static void PopulateRtkResidualMappings(map_name_to_info_t mappings[DID_COUNT], int DID)
 {
     typedef rtk_residual_t MAP_TYPE;
@@ -2107,6 +2108,7 @@ static void PopulateRtkDebugMappings(map_name_to_info_t mappings[DID_COUNT])
 
 	ASSERT_SIZE(totalSize);
 }
+#endif
 
 #if 0
 static void PopulateRtkDebug2Mappings(map_name_to_info_t mappings[DID_COUNT])
@@ -2506,7 +2508,7 @@ cISDataMappings::cISDataMappings()
 //     PopulateRtkStateMappings(m_lookupInfo);
 //     PopulateRtkResidualMappings(m_lookupInfo, DID_RTK_CODE_RESIDUAL);
 //     PopulateRtkResidualMappings(m_lookupInfo, DID_RTK_PHASE_RESIDUAL);
-	PopulateRtkDebugMappings(m_lookupInfo);
+//	PopulateRtkDebugMappings(m_lookupInfo);
 	// PopulateRtkDebug2Mappings(m_lookupInfo);
 	PopulateIMUDeltaThetaVelocityMagMappings(m_lookupInfo);
 	// PopulateIMUMagnetometerMappings(m_lookupInfo, DID_IMU_MAG);
@@ -2887,6 +2889,7 @@ double cISDataMappings::GetTimestamp(const p_data_hdr_t* hdr, const uint8_t* buf
 	}
 	
     // raw data types with observation use a custom timestamp function
+#if 0
     if (hdr->id == DID_GPS1_RAW || hdr->id == DID_GPS2_RAW || hdr->id == DID_GPS_BASE_RAW)
 	{
 		gps_raw_t* raw = (gps_raw_t*)buf;
@@ -2897,6 +2900,7 @@ double cISDataMappings::GetTimestamp(const p_data_hdr_t* hdr, const uint8_t* buf
 		}
 		return 0.0;
 	}
+#endif
 
 #if PLATFORM_IS_EMBEDDED
 

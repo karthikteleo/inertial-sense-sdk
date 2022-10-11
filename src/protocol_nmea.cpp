@@ -2,7 +2,7 @@
 #include "protocol_nmea.h"
 #include "ISPose.h"
 #include "ISEarth.h"
-
+#include "rtklib.h"
 
 //////////////////////////////////////////////////////////////////////////
 // Utility functions

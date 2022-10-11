@@ -803,15 +803,15 @@ static void appendGPSCoord(const gps_pos_t* gps, char** buffer, int* bufferLengt
 /* ubx gnss indicator (ref [2] 25) -------------------------------------------*/
 int ubxSys(int gnssID)
 {
-	switch (gnssID) {
-	case 0: return SYS_GPS;
-	case 1: return SYS_SBS;
-	case 2: return SYS_GAL;
-	case 3: return SYS_CMP;
-	case 5: return SYS_QZS;
-	case 6: return SYS_GLO;
-	}
-	return 0;
+//	switch (gnssID) {
+//	case 0: return SYS_GPS;
+//	case 1: return SYS_SBS;
+//	case 2: return SYS_GAL;
+//	case 3: return SYS_CMP;
+//	case 5: return SYS_QZS;
+//	case 6: return SYS_GLO;
+//	}
+    return 0;
 }
 
 /* satellite system+prn/slot number to satellite number ------------------------
@@ -822,35 +822,35 @@ int ubxSys(int gnssID)
 *-----------------------------------------------------------------------------*/
 int satNo(int sys, int prn)
 {
-	if (prn <= 0) return 0;
-	switch (sys) {
-	case SYS_GPS:
-		if (prn < MINPRNGPS || MAXPRNGPS < prn) return 0;
-		return prn - MINPRNGPS + 1;
-	case SYS_GLO:
-		if (prn < MINPRNGLO || MAXPRNGLO < prn) return 0;
-		return NSATGPS + prn - MINPRNGLO + 1;
-	case SYS_GAL:
-		if (prn < MINPRNGAL || MAXPRNGAL < prn) return 0;
-		return NSATGPS + NSATGLO + prn - MINPRNGAL + 1;
-	case SYS_QZS:
-		if (prn < MINPRNQZS || MAXPRNQZS < prn) return 0;
-		return NSATGPS + NSATGLO + NSATGAL + prn - MINPRNQZS + 1;
-	case SYS_CMP:
-		if (prn < MINPRNCMP || MAXPRNCMP < prn) return 0;
-		return NSATGPS + NSATGLO + NSATGAL + NSATQZS + prn - MINPRNCMP + 1;
-	case SYS_IRN:
-		if (prn < MINPRNIRN || MAXPRNIRN < prn) return 0;
-		return NSATGPS + NSATGLO + NSATGAL + NSATQZS + NSATCMP + prn - MINPRNIRN + 1;
-	case SYS_LEO:
-		if (prn < MINPRNLEO || MAXPRNLEO < prn) return 0;
-		return NSATGPS + NSATGLO + NSATGAL + NSATQZS + NSATCMP + NSATIRN +
-			prn - MINPRNLEO + 1;
-	case SYS_SBS:
-		if (prn < MINPRNSBS || MAXPRNSBS < prn) return 0;
-		return NSATGPS + NSATGLO + NSATGAL + NSATQZS + NSATCMP + NSATIRN + NSATLEO +
-			prn - MINPRNSBS + 1;
-	}
+//	if (prn <= 0) return 0;
+//	switch (sys) {
+//	case SYS_GPS:
+//		if (prn < MINPRNGPS || MAXPRNGPS < prn) return 0;
+//		return prn - MINPRNGPS + 1;
+//	case SYS_GLO:
+//		if (prn < MINPRNGLO || MAXPRNGLO < prn) return 0;
+//		return NSATGPS + prn - MINPRNGLO + 1;
+//	case SYS_GAL:
+//		if (prn < MINPRNGAL || MAXPRNGAL < prn) return 0;
+//		return NSATGPS + NSATGLO + prn - MINPRNGAL + 1;
+//	case SYS_QZS:
+//		if (prn < MINPRNQZS || MAXPRNQZS < prn) return 0;
+//		return NSATGPS + NSATGLO + NSATGAL + prn - MINPRNQZS + 1;
+//	case SYS_CMP:
+//		if (prn < MINPRNCMP || MAXPRNCMP < prn) return 0;
+//		return NSATGPS + NSATGLO + NSATGAL + NSATQZS + prn - MINPRNCMP + 1;
+//	case SYS_IRN:
+//		if (prn < MINPRNIRN || MAXPRNIRN < prn) return 0;
+//		return NSATGPS + NSATGLO + NSATGAL + NSATQZS + NSATCMP + prn - MINPRNIRN + 1;
+//	case SYS_LEO:
+//		if (prn < MINPRNLEO || MAXPRNLEO < prn) return 0;
+//		return NSATGPS + NSATGLO + NSATGAL + NSATQZS + NSATCMP + NSATIRN +
+//			prn - MINPRNLEO + 1;
+//	case SYS_SBS:
+//		if (prn < MINPRNSBS || MAXPRNSBS < prn) return 0;
+//		return NSATGPS + NSATGLO + NSATGAL + NSATQZS + NSATCMP + NSATIRN + NSATLEO +
+//			prn - MINPRNSBS + 1;
+//	}
 	return 0;
 }
 
@@ -861,7 +861,7 @@ int satNo(int sys, int prn)
 * return : satellite number (0:error)
 *-----------------------------------------------------------------------------*/
 int satNumCalc(int gnssID, int svID) {
-	int sys = ubxSys(gnssID);
-	int prn = svID + (sys == SYS_QZS ? 192 : 0);
-	return satNo(sys, prn);
+//	int sys = ubxSys(gnssID);
+//	int prn = svID + (sys == SYS_QZS ? 192 : 0);
+    return 0;// satNo(sys, prn);
 }

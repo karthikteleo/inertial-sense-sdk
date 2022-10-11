@@ -2630,576 +2630,109 @@ POP_PACK
 PUSH_PACK_8
 
 /** time struct */
-typedef struct
-{
-	/** time (s) expressed by standard time_t */
-	int64_t time;
+//typedef struct
+//{
+//	/** time (s) expressed by standard time_t */
+//	int64_t time;
 
-	/** fraction of second under 1 s */
-	double sec;         
-} gtime_t;
+//	/** fraction of second under 1 s */
+//	double sec;
+//} gtime_t;
 
-typedef struct PACKED
-{
-	gtime_t time;
-	double rp_ecef[3]; // Rover position
-	double rv_ecef[3]; // Rover velocity
-	double ra_ecef[3]; // Rover acceleration
-	double bp_ecef[3]; // Base position
-	double bv_ecef[3]; // Base velocity
-	double qr[6]; // rover position and velocity covariance main diagonal
-	double b[24]; // satellite bias
-	double qb[24]; // main diagonal of sat bias covariances
-	uint8_t sat_id[24]; // satellite id of b[]
-} rtk_state_t;
+//typedef struct PACKED
+//{
+//	gtime_t time;
+//	double rp_ecef[3]; // Rover position
+//	double rv_ecef[3]; // Rover velocity
+//	double ra_ecef[3]; // Rover acceleration
+//	double bp_ecef[3]; // Base position
+//	double bv_ecef[3]; // Base velocity
+//	double qr[6]; // rover position and velocity covariance main diagonal
+//	double b[24]; // satellite bias
+//	double qb[24]; // main diagonal of sat bias covariances
+//	uint8_t sat_id[24]; // satellite id of b[]
+//} rtk_state_t;
 
-typedef struct PACKED
-{
-	gtime_t time;
-	int32_t nv; // number of measurements
-	uint8_t sat_id_i[24]; // sat id of measurements (reference sat)
-	uint8_t sat_id_j[24]; // sat id of measurements
-	uint8_t type[24]; // type (0 = dd-range, 1 = dd-phase, 2 = baseline)
-	double v[24]; // residual
-} rtk_residual_t;
+//typedef struct PACKED
+//{
+//	gtime_t time;
+//	int32_t nv; // number of measurements
+//	uint8_t sat_id_i[24]; // sat id of measurements (reference sat)
+//	uint8_t sat_id_j[24]; // sat id of measurements
+//	uint8_t type[24]; // type (0 = dd-range, 1 = dd-phase, 2 = baseline)
+//	double v[24]; // residual
+//} rtk_residual_t;
 
-typedef struct PACKED
-{
-    gtime_t time;
+//typedef struct PACKED
+//{
+//    gtime_t time;
 
-    uint8_t rej_ovfl;
-    uint8_t code_outlier;
-    uint8_t phase_outlier;
-    uint8_t code_large_residual;
+//    uint8_t rej_ovfl;
+//    uint8_t code_outlier;
+//    uint8_t phase_outlier;
+//    uint8_t code_large_residual;
 
-    uint8_t phase_large_residual;
-    uint8_t invalid_base_position;
-    uint8_t bad_baseline_holdamb;
-    uint8_t base_position_error;
+//    uint8_t phase_large_residual;
+//    uint8_t invalid_base_position;
+//    uint8_t bad_baseline_holdamb;
+//    uint8_t base_position_error;
 
-    uint8_t outc_ovfl;
-    uint8_t reset_timer;
-    uint8_t use_ubx_position;
-    uint8_t large_v2b;
+//    uint8_t outc_ovfl;
+//    uint8_t reset_timer;
+//    uint8_t use_ubx_position;
+//    uint8_t large_v2b;
 
-    uint8_t base_position_update;
-    uint8_t rover_position_error;
-    uint8_t reset_bias;
-    uint8_t start_relpos;
+//    uint8_t base_position_update;
+//    uint8_t rover_position_error;
+//    uint8_t reset_bias;
+//    uint8_t start_relpos;
 
-    uint8_t end_relpos;
-    uint8_t start_rtkpos;
-    uint8_t pnt_pos_error;
-    uint8_t no_base_obs_data;
+//    uint8_t end_relpos;
+//    uint8_t start_rtkpos;
+//    uint8_t pnt_pos_error;
+//    uint8_t no_base_obs_data;
 
-    uint8_t diff_age_error;
-    uint8_t moveb_time_sync_error;
-    uint8_t waiting_for_rover_packet;
-    uint8_t waiting_for_base_packet;
+//    uint8_t diff_age_error;
+//    uint8_t moveb_time_sync_error;
+//    uint8_t waiting_for_rover_packet;
+//    uint8_t waiting_for_base_packet;
 
-	uint8_t lsq_error;
-    uint8_t lack_of_valid_sats;
-    uint8_t divergent_pnt_pos_iteration;
-    uint8_t chi_square_error;
+//	uint8_t lsq_error;
+//    uint8_t lack_of_valid_sats;
+//    uint8_t divergent_pnt_pos_iteration;
+//    uint8_t chi_square_error;
 
-    uint32_t cycle_slips;
+//    uint32_t cycle_slips;
 
-    float ubx_error;
+//    float ubx_error;
 
-	uint8_t solStatus;
-	uint8_t rescode_err_marker;
-	uint8_t error_count;
-	uint8_t error_code;
+//	uint8_t solStatus;
+//	uint8_t rescode_err_marker;
+//	uint8_t error_count;
+//	uint8_t error_code;
 
-    float dist2base;
+//    float dist2base;
 
-	uint8_t reserved1;
-	uint8_t gdop_error;
-	uint8_t warning_count;
-	uint8_t warning_code;
+//	uint8_t reserved1;
+//	uint8_t gdop_error;
+//	uint8_t warning_count;
+//	uint8_t warning_code;
 
-    double double_debug[4];
+//    double double_debug[4];
 
-	uint8_t debug[2];
-	uint8_t obs_count_bas;
-	uint8_t obs_count_rov;
+//	uint8_t debug[2];
+//	uint8_t obs_count_bas;
+//	uint8_t obs_count_rov;
 
-	uint8_t obs_pairs_filtered;
-	uint8_t obs_pairs_used;
-	uint8_t raw_ptr_queue_overrun;
-    uint8_t raw_dat_queue_overrun;
-} rtk_debug_t;
+//	uint8_t obs_pairs_filtered;
+//	uint8_t obs_pairs_used;
+//	uint8_t raw_ptr_queue_overrun;
+//    uint8_t raw_dat_queue_overrun;
+//} rtk_debug_t;
 
 POP_PACK
 
 PUSH_PACK_1
-
-/** (DID_GPS_RTK_OPT) RTK processing options */
-typedef struct
-{
-	/** positioning mode (PMODE_???) */
-	int32_t mode;           
-
-	/** solution type (0:forward,1:backward,2:combined) */
-	int32_t soltype;
-
-	/** number of frequencies (1:L1,2:L1+L2,3:L1+L2+L5) */
-	int32_t nf;
-
-	/** navigation systems */
-	int32_t navsys;
-
-	/** elevation mask angle (rad) */
-	double elmin;
-
-	/** Min snr to consider satellite for rtk */
-	int32_t snrmin;
-
-	/** AR mode (0:off,1:continuous,2:instantaneous,3:fix and hold,4:ppp-ar) */
-	int32_t modear;
-
-	/** GLONASS AR mode (0:off,1:on,2:auto cal,3:ext cal) */
-	int32_t glomodear;
-
-	/** GPS AR mode (0:off,1:on) */
-	int32_t gpsmodear;
-
-    /** SBAS AR mode (0:off,1:on) */
-    int32_t sbsmodear;
-
-	/** BeiDou AR mode (0:off,1:on) */
-	int32_t bdsmodear;
-
-	/** AR filtering to reject bad sats (0:off,1:on) */
-	int32_t arfilter;
-
-	/** obs outage count to reset bias */
-	int32_t maxout;
-
-    /** reject count to reset bias */
-    int32_t maxrej;
-
-	/** min lock count to fix ambiguity */
-	int32_t minlock;
-
-	/** min sats to fix integer ambiguities */
-	int32_t minfixsats;
-
-	/** min sats to hold integer ambiguities */
-	int32_t minholdsats;
-
-	/** min sats to drop sats in AR */
-	int32_t mindropsats;
-
-	/** use stdev estimates from receiver to adjust measurement variances */
-	int32_t rcvstds;
-
-	/** min fix count to hold ambiguity */
-	int32_t minfix;
-
-	/** max iteration to resolve ambiguity */
-	int32_t armaxiter;
-
-	/** dynamics model (0:none,1:velociy,2:accel) */
-	int32_t dynamics;
-
-	/** number of filter iteration */
-	int32_t niter;
-
-	/** interpolate reference obs (for post mission) */
-	int32_t intpref;
-
-	/** rover position for fixed mode */
-	int32_t rovpos;
-
-	/** base position for relative mode */
-	int32_t refpos;
-
-	/** code/phase error ratio */
-	double eratio[1];
-
-	/** measurement error factor */
-	double err[5];
-
-	/** initial-state std [0]bias,[1]iono [2]trop */
-	double std[3];
-
-	/** process-noise std [0]bias,[1]iono [2]trop [3]acch [4]accv [5] pos */
-	double prn[6];
-
-	/** satellite clock stability (sec/sec) */
-	double sclkstab;
-
-	/** AR validation threshold */
-	double thresar[8];
-
-	/** elevation mask of AR for rising satellite (rad) */
-	double elmaskar;
-
-	/** elevation mask to hold ambiguity (rad) */
-	double elmaskhold;
-
-	/** slip threshold of geometry-free phase (m) */
-	double thresslip;
-
-	/** variance for fix-and-hold pseudo measurements (cycle^2) */
-	double varholdamb;
-
-	/** gain used for GLO and SBAS sats to adjust ambiguity */
-	double gainholdamb;
-
-	/** max difference of time (sec) */
-	double maxtdiff;
-
-    /** reset sat biases after this long trying to get fix if not acquired */
-    int fix_reset_base_msgs;
-
-    /** reject threshold of NIS */
-    double maxinnocode;
-    double maxinnophase;
-    double maxnis;
-
-	/** reject threshold of gdop */
-	double maxgdop;
-
-    /** baseline length constraint {const,sigma before fix, sigma after fix} (m) */
-    double baseline[3];
-    double max_baseline_error;
-    double reset_baseline_error;
-
-    /** maximum error wrt ubx position (triggers reset if more than this far) (m) */
-    float max_ubx_error;
-
-	/** rover position for fixed mode {x,y,z} (ecef) (m) */
-	double ru[3];
-
-	/** base position for relative mode {x,y,z} (ecef) (m) */
-	double rb[3];
-
-	/** max averaging epochs */
-	int32_t maxaveep;
-
-	/** output single by dgps/float/fix/ppp outage */
-	int32_t outsingle;
-} prcopt_t;
-typedef prcopt_t gps_rtk_opt_t;
-
-/** Raw satellite observation data */
-typedef struct PACKED
-{
-	/** Receiver local time approximately aligned to the GPS time system (GPST) */
-	gtime_t time;
-
-	/** Satellite number in RTKlib notation.  GPS: 1-32, GLONASS: 33-59, Galilleo: 60-89, SBAS: 90-95 */
-	uint8_t sat;
-
-	/** receiver number */
-	uint8_t rcv;
-
-	/** Cno, carrier-to-noise density ratio (signal strength) (0.25 dB-Hz) */
-	uint8_t SNR[1];
-
-	/** Loss of Lock Indicator. Set to non-zero values only when carrier-phase is valid (L > 0).  bit1 = loss-of-lock, bit2 = half-cycle-invalid */
-	uint8_t LLI[1];
-
-	/** Code indicator: CODE_L1C (1) = L1C/A,G1C/A,E1C (GPS,GLO,GAL,QZS,SBS), CODE_L1X (12) = E1B+C,L1C(D+P) (GAL,QZS), CODE_L1I (47) = B1I (BeiDou) */
-	uint8_t code[1];
-
-	/** Estimated carrier phase measurement standard deviation (0.004 cycles), zero means invalid */
-	uint8_t qualL[1];
-
-	/** Estimated pseudorange measurement standard deviation (0.01 m), zero means invalid */
-	uint8_t qualP[1];
-
-	/** reserved, for alignment */
-	uint8_t reserved;
-
-	/** Observation data carrier-phase (cycle). The carrier phase initial ambiguity is initialized using an approximate value to make the magnitude of the phase close to the pseudorange measurement. Clock resets are applied to both phase and code measurements in accordance with the RINEX specification. */
-	double L[1];
-
-	/** Observation data pseudorange (m). GLONASS inter frequency channel delays are compensated with an internal calibration table */
-	double P[1]; 
-
-	/** Observation data Doppler measurement (positive sign for approaching satellites) (Hz) */
-	float D[1];
-} obsd_t;
-
-#define GPS_RAW_MESSAGE_BUF_SIZE    1000
-#define MAX_OBSERVATION_COUNT_IN_RTK_MESSAGE (GPS_RAW_MESSAGE_BUF_SIZE / sizeof(obsd_t))
-
-/** observation data */
-typedef struct
-{
-	/** number of observation slots used */
-	uint32_t n;
-
-	/** number of observation slots allocated */
-	uint32_t nmax;
-
-	/** observation data buffer */
-	obsd_t* data;
-} obs_t;
-
-/** non-Glonass ephemeris data */
-typedef struct
-{
-    /** Satellite number in RTKlib notation.  GPS: 1-32, GLONASS: 33-59, Galilleo: 60-89, SBAS: 90-95 */
-    int32_t sat;
-
-	/** IODE Issue of Data, Ephemeris (ephemeris version) */
-	int32_t iode;
-	
-	/** IODC Issue of Data, Clock (clock version) */
-	int32_t iodc;
-
-	/** SV accuracy (URA index) IRN-IS-200H p.97 */
-	int32_t sva;            
-
-	/** SV health GPS/QZS (0:ok) */
-	int32_t svh;            
-
-	/** GPS/QZS: gps week, GAL: galileo week */
-	int32_t week;
-
-	/** GPS/QZS: code on L2. (00 = Invalid, 01 = P Code ON, 11 = C/A code ON, 11 = Invalid).  GAL/CMP: data sources */
-	int32_t code;
-
-	/** GPS/QZS: L2 P data flag (indicates that the NAV data stream was commanded OFF on the P-code of the in-phase component of the L2 channel). CMP: nav type */
-	int32_t flag;
-
-	/** Time Of Ephemeris, ephemeris reference epoch in seconds within the week (s) */
-	gtime_t toe;
-	
-	/** clock data reference time (s) (20.3.4.5) */
-	gtime_t toc;
-	
-	/** T_trans (s) */
-	gtime_t ttr;
-
-	/** Orbit semi-major axis (m) */
-	double A;
-
-	/** Orbit eccentricity (non-dimensional)  */
-	double e;
-
-	/** Orbit inclination angle at reference time (rad) */
-	double i0;
-
-	/** Longitude of ascending node of orbit plane at weekly epoch (rad) */
-	double OMG0;
-
-	/** Argument of perigee (rad) */
-	double omg;
-
-	/** Mean anomaly at reference time (rad) */
-	double M0;
-
-	/** Mean Motion Difference From Computed Value (rad) */
-	double deln;
-
-	/** Rate of Right Ascension (rad/s) */
-	double OMGd;
-
-	/** Rate of Inclination Angle (rad/s) */
-	double idot;
-
-	/** Amplitude of the Cosine Harmonic Correction Term to the Orbit Radius (m) */
-	double crc;
-
-	/** Amplitude of the Sine Harmonic Correction Term to the Orbit Radius (m) */
-	double crs;
-
-	/** Amplitude of the Cosine Harmonic Correction Term to the Argument of Latitude (rad)  */
-	double cuc;
-
-	/** Amplitude of the Sine Harmonic Correction Term to the Argument of Latitude (rad) */
-	double cus;
-
-	/** Amplitude of the Cosine Harmonic Correction Term to the Angle of Inclination (rad) */
-	double cic;
-
-	/** Amplitude of the Sine Harmonic Correction Term to the Angle of Inclination (rad) */
-	double cis;
-
-	/** Time Of Ephemeris, ephemeris reference epoch in seconds within the week (s), same as <toe> above but represented as double type. Note that toe is computed as eph->toe = gst2time(week, eph->toes) */
-	double toes;
-
-	/** Fit interval (h) (0: 4 hours, 1: greater than 4 hours) */
-	double fit;
-
-	/** SV clock offset, af0 (s) */
-	double f0;
-	
-	/** SV clock drift, af1 (s/s, non-dimensional) */
-	double f1;
-	
-	/** SV clock drift rate, af2 (1/s) */
-	double f2;
-
-	/** Group delay parameters GPS/QZS: tgd[0] = TGD (IRN-IS-200H p.103). Galilleo: tgd[0] = BGD E5a/E1, tgd[1] = BGD E5b/E1. Beidou: tgd[0] = BGD1, tgd[1] = BGD2 */
-	double tgd[4];
-
-	/** Adot for CNAV, not used */
-	double Adot;
-	
-	/** First derivative of mean motion n (second derivative of mean anomaly M), ndot for CNAV (rad/s/s). Not used. */
-	double ndot;
-} eph_t;
-
-/** Glonass ephemeris data */
-typedef struct
-{        
-    /** Satellite number in RTKlib notation.  GPS: 1-32, GLONASS: 33-59, Galilleo: 60-89, SBAS: 90-95 */
-    int32_t sat;
-
-	/** IODE (0-6 bit of tb field) */
-	int32_t iode;
-
-	/** satellite frequency number */
-	int32_t frq;
-
-	/** satellite health */
-	int32_t svh;
-	
-	/** satellite accuracy */
-	int32_t sva;
-	
-	/** satellite age of operation */
-	int32_t age;
-
-    /** Ephemeris reference epoch in seconds within the week in GPS time gpst (s) */
-	gtime_t toe;
-
-	/** message frame time in gpst (s) */
-	gtime_t tof;
-
-	/** satellite position (ecef) (m) */
-	double pos[3];
-
-	/** satellite velocity (ecef) (m/s) */
-	double vel[3];
-
-	/** satellite acceleration (ecef) (m/s^2) */
-	double acc[3];
-
-	/** SV clock bias (s) */
-	double taun;
-
-	/** relative frequency bias */
-	double gamn;
-
-	/** delay between L1 and L2 (s) */
-	double dtaun;
-} geph_t;
-
-/** SBAS message type */
-typedef struct
-{
-	/** receiption time - week */
-	int32_t week;
-	
-	/** reception time - tow */
-	int32_t tow;
-
-	/** SBAS satellite PRN number */
-	int32_t prn;
-
-	/** SBAS message (226bit) padded by 0 */
-	uint8_t msg[29];
-
-	/** reserved for alighment */
-	uint8_t reserved[3];
-} sbsmsg_t;
-
-/** station parameter type */
-typedef struct
-{
-	/** antenna delta type (0:enu,1:xyz) */
-	int32_t deltype;
-	
-	/** station position (ecef) (m) */
-	double pos[3];
-
-	/** antenna position delta (e/n/u or x/y/z) (m) */
-	double del[3];
-
-	/** antenna height (m) */
-	double hgt;
-	
-	/** station id */
-	int32_t stationId;
-} sta_t;
-
-/** almanac type */
-typedef struct
-{
-	/** satellite number */
-	int32_t sat;
-
-	/** sv health (0:ok) */
-	int32_t svh;
-
-	/** as and sv config */
-	int32_t svconf;
-
-	/* GPS/QZS: gps week, GAL: galileo week */
-	int32_t week;
-
-	/* Toa */
-	gtime_t toa;        
-						
-	/** SV orbit parameters - A */
-	double A;
-
-	/** SV orbit parameters - e */
-	double e;
-
-	/** SV orbit parameters - i0 */
-	double i0;
-
-	/** SV orbit parameters - OMG0 */
-	double OMG0;
-	
-	/** SV orbit parameters - omg */
-	double omg;
-	
-	/** SV orbit parameters - M0 */
-	double M0;
-	
-	/** SV orbit parameters - OMGd */
-	double OMGd;
-
-	/** Toa (s) in week - toas */
-	double toas;
-
-	/** SV clock parameters - af0 */
-	double f0;
-	
-	/** SV clock parameters - af1 */
-	double f1;
-} alm_t;
-
-/** ionosphere model and utc parameters */
-typedef struct
-{
-	double ion_gps[8];  /* GPS iono model parameters {a0,a1,a2,a3,b0,b1,b2,b3} */
-	double ion_gal[4];  /* Galileo iono model parameters {ai0,ai1,ai2,0} */
-	double ion_qzs[8];  /* QZSS iono model parameters {a0,a1,a2,a3,b0,b1,b2,b3} */
-	double ion_cmp[8];  /* BeiDou iono model parameters {a0,a1,a2,a3,b0,b1,b2,b3} */
-	double ion_irn[8];  /* IRNSS iono model parameters {a0,a1,a2,a3,b0,b1,b2,b3} */
-
-	double utc_gps[4];  /* GPS delta-UTC parameters {A0,A1,T,W} */
-	double utc_glo[4];  /* GLONASS UTC GPS time parameters */
-	double utc_gal[4];  /* Galileo UTC GPS time parameters */
-	double utc_qzs[4];  /* QZS UTC GPS time parameters */
-	double utc_cmp[4];  /* BeiDou UTC parameters */
-	double utc_irn[4];  /* IRNSS UTC parameters */
-	double utc_sbs[4];  /* SBAS UTC parameters */
-
-	int32_t leaps;      /* leap seconds (s) */
-	
-	alm_t alm;			/* almanac */
-} ion_model_utc_alm_t;
 
 /** RTK solution status */
 typedef enum
@@ -3388,45 +2921,45 @@ typedef enum
 } eRawDataType;
 
 typedef union PACKED
-{   
+{
     /** Satellite observation data */
-    obsd_t              obs[MAX_OBSERVATION_COUNT_IN_RTK_MESSAGE];
+//    obsd_t              obs[MAX_OBSERVATION_COUNT_IN_RTK_MESSAGE];
     
-    /** Satellite non-GLONASS ephemeris data (GPS, Galileo, Beidou, QZSS) */
-    eph_t               eph;
+//    /** Satellite non-GLONASS ephemeris data (GPS, Galileo, Beidou, QZSS) */
+//    eph_t               eph;
     
-    /** Satellite GLONASS ephemeris data */
-    geph_t              gloEph;
+//    /** Satellite GLONASS ephemeris data */
+//    geph_t              gloEph;
     
-    /** Satellite-Based Augmentation Systems (SBAS) data */
-    sbsmsg_t            sbas;
+//    /** Satellite-Based Augmentation Systems (SBAS) data */
+//    sbsmsg_t            sbas;
         
-    /** Base station information (base position, antenna position, antenna height, etc.) */
-    sta_t               sta;
+//    /** Base station information (base position, antenna position, antenna height, etc.) */
+//    sta_t               sta;
 
-    /** Ionosphere model and UTC parameters */
-    ion_model_utc_alm_t ion;
+//    /** Ionosphere model and UTC parameters */
+//    ion_model_utc_alm_t ion;
 
     /** Byte buffer */
-    uint8_t             buf[GPS_RAW_MESSAGE_BUF_SIZE];
+    uint8_t             buf[1024];
 } uGpsRawData;
 
 /** Message wrapper for DID_GPS1_RAW, DID_GPS2_RAW, and DID_GPS_BASE_RAW.  The contents of data can vary for this message and are determined by `dataType` field. */
 typedef struct PACKED
 {
-	/** Receiver index (1=RECEIVER_INDEX_GPS1, 2=RECEIVER_INDEX_EXTERNAL_BASE, or 3=RECEIVER_INDEX_GPS2 ) */
-	uint8_t receiverIndex;
+    /** Receiver index (1=RECEIVER_INDEX_GPS1, 2=RECEIVER_INDEX_EXTERNAL_BASE, or 3=RECEIVER_INDEX_GPS2 ) */
+    uint8_t receiverIndex;
 
-	/** Type of data (eRawDataType: 1=observations, 2=ephemeris, 3=glonassEphemeris, 4=SBAS, 5=baseAntenna, 6=IonosphereModel) */
-	uint8_t dataType;
+    /** Type of data (eRawDataType: 1=observations, 2=ephemeris, 3=glonassEphemeris, 4=SBAS, 5=baseAntenna, 6=IonosphereModel) */
+    uint8_t dataType;
 
-	/** Number of observations in data (obsd_t) when dataType==1 (raw_data_type_observation). */
-	uint8_t obsCount;
+    /** Number of observations in data (obsd_t) when dataType==1 (raw_data_type_observation). */
+    uint8_t obsCount;
 
-	/** Reserved */
-	uint8_t reserved;
+    /** Reserved */
+    uint8_t reserved;
 
-    /** Interpret based on dataType (see eRawDataType) */    
+    /** Interpret based on dataType (see eRawDataType) */
     uGpsRawData data;
 } gps_raw_t;
 
@@ -4288,211 +3821,6 @@ void julianToDate(double julian, int32_t* year, int32_t* month, int32_t* day, in
 
 /** Convert GPS Week and Seconds to Julian Date.  Leap seconds are the GPS-UTC offset (18 seconds as of December 31, 2016). */
 double gpsToJulian(int32_t gpsWeek, int32_t gpsMilliseconds, int32_t leapSeconds);
-
-
-#ifndef RTKLIB_H
-#define SYS_NONE    0x00                /* navigation system: none */
-#define SYS_GPS     0x01                /* navigation system: GPS */
-#define SYS_SBS     0x02                /* navigation system: SBAS */
-#define SYS_GLO     0x04                /* navigation system: GLONASS */
-#define SYS_GAL     0x08                /* navigation system: Galileo */
-#define SYS_QZS     0x10                /* navigation system: QZSS */
-#define SYS_CMP     0x20                /* navigation system: BeiDou */
-#define SYS_IRN     0x40                /* navigation system: IRNS */
-#define SYS_LEO     0x80                /* navigation system: LEO */
-#define SYS_ALL     0xFF                /* navigation system: all */
-#endif
-
-/*
-Convert gnssID to ubx gnss indicator (ref [2] 25)
-
-@param gnssID gnssID of satellite
-@return ubx gnss indicator
-*/
-int ubxSys(int gnssID);
-
-#ifndef __RTKLIB_EMBEDDED_DEFINES_H_
-
-#undef ENAGLO
-#define ENAGLO
-
-#undef ENAGAL
-#define ENAGAL
-
-#undef ENAQZS
-//#define ENAQZS
-
-#undef ENASBS
-#define ENASBS
-
-#undef MAXSUBFRMLEN
-#define MAXSUBFRMLEN 152
-
-#undef MAXRAWLEN
-#define MAXRAWLEN 2048
-
-#undef NFREQ
-#define NFREQ 1
-
-#undef NFREQGLO
-#ifdef ENAGLO
-#define NFREQGLO 1
-#else
-#define NFREQGLO 0
-#endif
-
-#undef NFREQGAL
-#ifdef ENAGAL
-#define NFREQGAL 1
-#else
-#define NFREQGAL 0
-#endif
-
-#undef NEXOBS
-#define NEXOBS 0
-
-#undef MAXOBS
-#define MAXOBS 56               // Also defined inside rtklib_defines.h
-#define HALF_MAXOBS (MAXOBS/2)
-
-#undef NUMSATSOL
-#define NUMSATSOL 22
-
-#undef MAXERRMSG
-#define MAXERRMSG 0
-
-#ifdef ENASBS
-
-// sbas waas only satellites
-#undef MINPRNSBS
-#define MINPRNSBS 133                 /* min satellite PRN number of SBAS */
-
-#undef MAXPRNSBS
-#define MAXPRNSBS 138                 /* max satellite PRN number of SBAS */
-
-#undef NSATSBS
-#define NSATSBS (MAXPRNSBS - MINPRNSBS + 1) /* number of SBAS satellites */
-
-#define SBAS_EPHEMERIS_ARRAY_SIZE NSATSBS
-
-#else
-
-#define SBAS_EPHEMERIS_ARRAY_SIZE 0
-
-#endif
-
-
-#endif
-
-#ifndef RTKLIB_H
-
-#define MINPRNGPS   1                   /* min satellite PRN number of GPS */
-#define MAXPRNGPS   32                  /* max satellite PRN number of GPS */
-#define NSATGPS     (MAXPRNGPS-MINPRNGPS+1) /* number of GPS satellites */
-#define NSYSGPS     1
-
-#ifdef ENAGLO
-#define MINPRNGLO   1                   /* min satellite slot number of GLONASS */
-#define MAXPRNGLO   27                  /* max satellite slot number of GLONASS */
-#define NSATGLO     (MAXPRNGLO-MINPRNGLO+1) /* number of GLONASS satellites */
-#define NSYSGLO     1
-#else
-#define MINPRNGLO   0
-#define MAXPRNGLO   0
-#define NSATGLO     0
-#define NSYSGLO     0
-#endif
-#ifdef ENAGAL
-#define MINPRNGAL   1                   /* min satellite PRN number of Galileo */
-#define MAXPRNGAL   30                  /* max satellite PRN number of Galileo */
-#define NSATGAL    (MAXPRNGAL-MINPRNGAL+1) /* number of Galileo satellites */
-#define NSYSGAL     1
-#else
-#define MINPRNGAL   0
-#define MAXPRNGAL   0
-#define NSATGAL     0
-#define NSYSGAL     0
-#endif
-#ifdef ENAQZS
-#define MINPRNQZS   193                 /* min satellite PRN number of QZSS */
-#define MAXPRNQZS   199                 /* max satellite PRN number of QZSS */
-#define MINPRNQZS_S 183                 /* min satellite PRN number of QZSS SAIF */
-#define MAXPRNQZS_S 189                 /* max satellite PRN number of QZSS SAIF */
-#define NSATQZS     (MAXPRNQZS-MINPRNQZS+1) /* number of QZSS satellites */
-#define NSYSQZS     1
-#else
-#define MINPRNQZS   0
-#define MAXPRNQZS   0
-#define MINPRNQZS_S 0
-#define MAXPRNQZS_S 0
-#define NSATQZS     0
-#define NSYSQZS     0
-#endif
-#ifdef ENACMP
-#define MINPRNCMP   1                   /* min satellite sat number of BeiDou */
-#define MAXPRNCMP   35                  /* max satellite sat number of BeiDou */
-#define NSATCMP     (MAXPRNCMP-MINPRNCMP+1) /* number of BeiDou satellites */
-#define NSYSCMP     1
-#else
-#define MINPRNCMP   0
-#define MAXPRNCMP   0
-#define NSATCMP     0
-#define NSYSCMP     0
-#endif
-#ifdef ENAIRN
-#define MINPRNIRN   1                   /* min satellite sat number of IRNSS */
-#define MAXPRNIRN   7                   /* max satellite sat number of IRNSS */
-#define NSATIRN     (MAXPRNIRN-MINPRNIRN+1) /* number of IRNSS satellites */
-#define NSYSIRN     1
-#else
-#define MINPRNIRN   0
-#define MAXPRNIRN   0
-#define NSATIRN     0
-#define NSYSIRN     0
-#endif
-#ifdef ENALEO
-#define MINPRNLEO   1                   /* min satellite sat number of LEO */
-#define MAXPRNLEO   10                  /* max satellite sat number of LEO */
-#define NSATLEO     (MAXPRNLEO-MINPRNLEO+1) /* number of LEO satellites */
-#define NSYSLEO     1
-#else
-#define MINPRNLEO   0
-#define MAXPRNLEO   0
-#define NSATLEO     0
-#define NSYSLEO     0
-#endif
-#define NSYS        (NSYSGPS+NSYSGLO+NSYSGAL+NSYSQZS+NSYSCMP+NSYSIRN+NSYSLEO) /* number of systems */
-#ifndef NSATSBS
-#ifdef ENASBS
-#define MINPRNSBS   120                 /* min satellite PRN number of SBAS */
-#define MAXPRNSBS   142                 /* max satellite PRN number of SBAS */
-#define NSATSBS     (MAXPRNSBS-MINPRNSBS+1) /* number of SBAS satellites */
-#else
-#define MINPRNSBS   0
-#define MAXPRNSBS   0
-#define NSATSBS     0
-#endif
-#endif
-
-#endif
-/*
-Convert satellite constelation and prn/slot number to satellite number
-
-@param sys satellite system (SYS_GPS,SYS_GLO,...)
-@param prn satellite prn/slot number
-@return satellite number (0:error)
-*/
-int satNo(int sys, int prn);
-
-/*
-convert satellite gnssID + svID to satellite number
-
-@param gnssID satellite system 
-@param svID satellite prn/slot number
-@return satellite number (0:error)
-*/
-int satNumCalc(int gnssID, int svID);
-
 
 #ifdef __cplusplus
 }
