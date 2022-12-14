@@ -1130,14 +1130,15 @@ typedef struct PACKED
 	/** IMU sample period in milliseconds. Zero disables sampling. */
 	uint32_t				imuPeriodMs;
 
-	/** Preintegrated IMU (PIMU) integration period and navigation filter update period (ms). */
+	/** Preintegrated IMU (PIMU) integration period and navigation filter (INS/AHRS) output data period in milliseconds. */
 	uint32_t				navPeriodMs;
-	
+
+	/** Update period of extended kalman filter (EKF) in milliseconds. */
+	uint32_t				ekfPeriodMs;
+
 	/** Actual sample period relative to GPS PPS */
 	double					sensorTruePeriod;
 
-	/** Reserved */
-	float					reserved2;
 	/** Reserved */
 	float					reserved3;
 
