@@ -1219,7 +1219,8 @@ enum eSystemCommand
     SYS_CMD_ENABLE_SERIAL_PORT_BRIDGE_USB_TO_SER1   = 14,
     SYS_CMD_ENABLE_SERIAL_PORT_BRIDGE_USB_TO_SER2   = 15,
 
-    SYS_CMD_SAVE_FLASH                              = 97,
+    SYS_CMD_SYNC_TO_FLASH_NOW                       = 96,			// Write settings and changes to flash immediately
+    SYS_CMD_SAVE_FLASH                              = 97,			// Enable flash writing, using flash timeout to finalize
     SYS_CMD_SAVE_GPS_ASSIST_TO_FLASH_RESET          = 98,
     SYS_CMD_SOFTWARE_RESET                          = 99,
     SYS_CMD_MANF_UNLOCK                             = 1122334455,
