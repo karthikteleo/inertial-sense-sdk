@@ -23,7 +23,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 struct mcan_module mcan_instance;
 
-void CAN_init(uint32_t baudrate, uint32_t rx_address)
+void can_init(uint32_t baudrate, uint32_t rx_address)
 {
 	mcan_stop(&mcan_instance);
 	/* Initialize the module. */

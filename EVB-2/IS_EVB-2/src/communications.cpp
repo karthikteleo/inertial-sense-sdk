@@ -595,7 +595,7 @@ void update_flash_cfg(evb_flash_cfg_t &newCfg)
     }
 	if (reinitCAN)
 	{
-		CAN_init(g_flashCfg->CANbaud_kbps*1000, g_flashCfg->can_receive_address);
+		can_init(g_flashCfg->CANbaud_kbps*1000, g_flashCfg->can_receive_address);
 	}
 	if (reinitWheelEncoder)
 	{
