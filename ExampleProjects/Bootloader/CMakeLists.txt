@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.9)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 project(ISBootloaderExample)
 
@@ -17,18 +17,16 @@ add_executable(ISBootloaderExample
 	ISBootloaderExample.cpp
 	../../src/data_sets.c
 	
-	../../hw-libs/bootloader/bootloaderShared.c
+	../../hw-libs/firmwareSignatures.c
 	../../src/ihex.c
 	../../src/ISComm.c
 	../../src/serialPort.c
 	../../src/serialPortPlatform.c
 	../../src/ISSerialPort.cpp
-	../../src/ISBootloaderBase.cpp
-	../../src/ISBootloaderThread.cpp
-	../../src/ISBootloaderAPP.cpp
-	../../src/ISBootloaderISB.cpp
-	../../src/ISBootloaderDFU.cpp
-	../../src/ISBootloaderSAMBA.cpp
+	# ../../src/ISBootloaderBase.cpp
+	# ../../src/ISBootloaderThread.cpp
+	# ../../src/ISBootloaderAPP.cpp
+	# ../../src/ISBootloaderDFU.cpp
 	../../src/ISUtilities.cpp
 	../../src/ISStream.cpp
 	../../src/ISFileManager.cpp

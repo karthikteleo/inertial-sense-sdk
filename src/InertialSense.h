@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -108,29 +108,15 @@ public:
 	*/
 	virtual ~InertialSense();
 
-	/*
-	* Broadcast binary data
-	* @param dataId the data id (DID_* - see data_sets.h) to broadcast
-	* @param periodMultiple a scalar that the source period is multiplied by to give the output period in milliseconds, 0 for one time message, less than 0 to disable broadcast of the specified dataId
-	* @param callback optional callback for this dataId
-	* @return true if success, false if error - if callback is NULL and no global callback was passed to the constructor, this will return false
-	*/ 
-	bool BroadcastBinaryData(uint32_t dataId, int periodMultiple, pfnHandleBinaryData callback = NULL);
-
 	/**
-	* Close the connection, logger and free all resources
+	* Set functions pointers called when various message types are received.
 	*/
-	void Close();
-
-	/**
-	* Get all open serial port names
-	*/
-	std::vector<std::string> GetPorts();
-
-	/**
-	* Check if the connection is open
-	*/
-	bool IsOpen();
+	void SetCallbacks(
+		pfnComManagerAsapMsg handlerRmc=NULLPTR,
+		pfnComManagerGenMsgHandler handlerAscii=NULLPTR,
+		pfnComManagerGenMsgHandler handlerUblox=NULLPTR, 
+		pfnComManagerGenMsgHandler handlerRtcm3=NULLPTR,
+		pfnComManagerGenMsgHandler handlerSpartn=NULLPTR);
 
 	/**
 	* Closes any open connection and then opens the device
@@ -139,7 +125,22 @@ public:
 	* @param disableBroadcastsOnClose whether to send a stop broadcasts command to all units on Close
 	* @return true if opened, false if failure (i.e. baud rate is bad or port fails to open)
 	*/
-	bool Open(const char* port, int baudRate = IS_COM_BAUDRATE_DEFAULT, bool disableBroadcastsOnClose = false);
+	bool Open(const char* port, int baudRate=IS_COM_BAUDRATE_DEFAULT, bool disableBroadcastsOnClose=false);
+
+	/**
+	* Check if the connection is open
+	*/
+	bool IsOpen();
+
+	/**
+	* Close the device connection, stop logger if running, and free resources.
+	*/
+	void Close();
+
+	/**
+	* Get all open serial port names
+	*/
+	std::vector<std::string> GetPorts();
 
 	/**
 	* Get the number of open devices
@@ -174,12 +175,6 @@ public:
         float maxDiskSpacePercent = 0.5f, 
         uint32_t maxFileSize = 1024 * 1024 * 5, 
         const std::string& subFolder = cISLogger::g_emptyString);
-
-	/**
-	* Enable streaming of predefined set of messages.  The default preset, RMC_PRESET_INS_BITS, stream data necessary for post processing.
-	* @param rmcPreset realtimeMessageController preset
-	*/
-	void BroadcastBinaryDataRmcPreset(uint64_t rmcPreset=RMC_PRESET_INS_BITS, uint32_t rmcOptions=0);
 
 	/**
 	* Gets whether logging is enabled
@@ -312,6 +307,21 @@ public:
 	void SetEvbFlashConfig(const evb_flash_cfg_t& evbFlashCfg, int pHandle = 0);
 
 	/**
+	* Broadcast binary data
+	* @param dataId the data id (DID_* - see data_sets.h) to broadcast
+	* @param periodMultiple a scalar that the source period is multiplied by to give the output period in milliseconds, 0 for one time message, less than 0 to disable broadcast of the specified dataId
+	* @param callback optional callback for this dataId
+	* @return true if success, false if error - if callback is NULL and no global callback was passed to the constructor, this will return false
+	*/ 
+	bool BroadcastBinaryData(uint32_t dataId, int periodMultiple, pfnHandleBinaryData callback = NULL);
+
+	/**
+	* Enable streaming of predefined set of messages.  The default preset, RMC_PRESET_INS_BITS, stream data necessary for post processing.
+	* @param rmcPreset realtimeMessageController preset
+	*/
+	void BroadcastBinaryDataRmcPreset(uint64_t rmcPreset=RMC_PRESET_INS_BITS, uint32_t rmcOptions=0);
+
+	/**
 	* Get the number of bytes read or written to/from client or server connections
 	* @return byte count
 	*/
@@ -368,6 +378,12 @@ public:
 	void SetTimeoutFlushLoggerSeconds(time_t timeoutFlushLoggerSeconds) { m_logger.SetTimeoutFlushSeconds(timeoutFlushLoggerSeconds); }
 
 	/**
+	* Enable the device validate used to verify device response when Open() is called.
+	* @param enable device validation
+	*/
+	void EnableDeviceValidation(bool enable) { m_enableDeviceValidation = enable; }
+
+	/**
 	* Bootload a file - if the bootloader fails, the device stays in bootloader mode and you must call BootloadFile again until it succeeds. If the bootloader gets stuck or has any issues, power cycle the device.
 	* Please ensure that all other connections to the com port are closed before calling this function.
 	*
@@ -416,6 +432,7 @@ private:
 	int m_clientConnectionsTotal = 0;
 	mul_msg_stats_t m_clientMessageStats = {};
 
+	bool m_enableDeviceValidation = true;
 	bool m_disableBroadcastsOnClose;
 	com_manager_init_t m_cmInit;
 	com_manager_port_t *m_cmPorts;
@@ -432,6 +449,7 @@ private:
 	bool HasReceivedResponseFromAllDevices();
 	void RemoveDevice(size_t index);
 	bool OpenSerialPorts(const char* port, int baudRate);
+	void CloseSerialPorts();
 	static void LoggerThread(void* info);
 	static void StepLogger(InertialSense* i, const p_data_t* data, int pHandle);
 	static void BootloadStatusUpdate(void* obj, const char* str);

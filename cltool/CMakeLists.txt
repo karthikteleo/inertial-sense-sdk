@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.9)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 project(cltool)
 
@@ -38,13 +38,11 @@ add_executable(cltool
 	../src/DeviceLogSorted.cpp
 	../src/ihex.c
 	../src/InertialSense.cpp
-	../src/ISBootloaderThread.cpp
-	../src/ISBootloaderBase.cpp
-    ../src/ISBootloaderISB.cpp
-	../src/ISBootloaderDFU.cpp
-	../src/ISBootloaderSAMBA.cpp
-	../src/ISBootloaderAPP.cpp
-	../hw-libs/bootloader/bootloaderShared.c
+	# ../src/ISBootloaderThread.cpp
+	# ../src/ISBootloaderBase.cpp
+	# ../src/ISBootloaderDFU.cpp
+	# ../src/ISBootloaderAPP.cpp
+	../hw-libs/firmwareSignatures.c
 	../src/ISClient.cpp
 	../src/ISComm.c
 	../src/ISDataMappings.cpp

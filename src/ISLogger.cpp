@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -29,6 +29,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "ISLogger.h"
 #include "ISDataMappings.h"
 #include "ISLogFileFactory.h"
+#include "ISUtilities.h"
 
 #include "convert_ins.h"
 
@@ -341,7 +342,9 @@ bool cISLogger::LoadFromDirectory(const string& directory, eLogType logType, vec
                         }
                         m_devices.back()->SetupReadInfo(directory, serialNumber, m_timeStamp);
 
-#if LOG_DEBUG_GEN
+#if (LOG_DEBUG_GEN == 2)
+						advance_cursor();
+#elif LOG_DEBUG_GEN
 						printf("cISLogger::LoadFromDirectory SN%s %s (file %d of %d)\n", serialNumber.c_str(), m_timeStamp.c_str(), (int)i + 1, (int)files.size());
 #endif
 					}
@@ -543,6 +546,16 @@ uint32_t cISLogger::FileCount( unsigned int device )
 	return m_devices[device]->FileCount();
 }
 
+std::string cISLogger::GetNewFileName(unsigned int device, uint32_t serialNumber, uint32_t fileCount, const char* suffix)
+{
+	if (device < m_devices.size())
+	{
+		return m_devices[device]->GetNewFileName(serialNumber, fileCount, suffix);
+	}
+
+	return std::string("");
+}
+
 bool cISLogger::SetDeviceInfo(const dev_info_t *info, unsigned int device )
 {
 	if (device >= m_devices.size() || info == NULL)
@@ -582,12 +595,14 @@ bool cISLogger::CopyLog(cISLogger& log, const string& timestamp, const string &o
 		const dev_info_t* devInfo = log.GetDeviceInfo(dev);
 		SetDeviceInfo(devInfo, dev);
 
-#if LOG_DEBUG_GEN || DEBUG_PRINT
+#if LOG_DEBUG_GEN == 2
+		// Don't print status here
+#elif LOG_DEBUG_GEN || DEBUG_PRINT
 		printf("cISLogger::CopyLog SN%d type %d, (%d of %d)\n", devInfo->serialNumber, logType, dev+1, log.GetDeviceCount());
 #endif
 
 		// Set KML configuration
-		m_devices[dev]->SetKmlConfig(m_showPath, m_showSample, m_showTimeStamp, m_iconUpdatePeriodSec, m_altClampToGround);
+		m_devices[dev]->SetKmlConfig(m_gpsData, m_showPath, m_showSample, m_showTimeStamp, m_iconUpdatePeriodSec, m_altClampToGround);
 
 		// Copy data		
 		for (g_copyReadCount = 0; (data = log.ReadData(dev)); g_copyReadCount++)
@@ -597,6 +612,10 @@ bool cISLogger::CopyLog(cISLogger& log, const string& timestamp, const string &o
 			double timestamp = cISDataMappings::GetTimestamp(&(data->hdr), data->buf);
 			printf("read: %d DID: %3d time: %.4lf\n", g_copyReadCount, data->hdr.id, timestamp);
 			g_copyReadDid = data->hdr.id;
+#endif
+
+#if LOG_DEBUG_GEN == 2
+			advance_cursor();
 #endif
 
 			// CSV special cases 
@@ -671,4 +690,6 @@ bool cISLogger::ReadAllLogDataIntoMemory(const string& directory, map<uint32_t, 
     }
     return true;
 }
+
+
 

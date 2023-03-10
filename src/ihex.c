@@ -10,7 +10,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -79,7 +79,7 @@ static int ihex_load_section(FILE** ihex_file, ihex_image_section_t* section)
         line[0] = '\0';
 
         last_line = ftell(*ihex_file);
-        fgets(line, 512, *ihex_file);
+        if (fgets(line, 512, *ihex_file)){}
 
         // Turn end of line characters into cstring terminators
         if (line[strlen(line) - 1] == '\n') line[strlen(line) - 1] = '\0';

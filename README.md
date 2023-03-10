@@ -12,19 +12,22 @@ The [Inertial Sense software development kit (SDK)](https://github.com/inertials
 
 **EVB-2** - Multi-purpose hardware evaluation and development kit for the uINS.  The EVB-2 includes the uINS-G2 with Dual GNSS, RTK heading / positioning, onboard logging to micro SD card, 915MHz XBee radio for RTK base corrections, WiFi and BLE interface, serial and SPI communications to uINS interface, and Microchip SAME70 processor as communications bridge and user project development environment.   
 
+**ROS** - The `inertial-sense-sdk/ros` directory contains the [ROS wrapper node implementation](ros) for the Inertial Sense IMX product line.
+
 ### Documents
 
  * [User Manual, Datasheet, and Dimensions](http://docs.inertialsense.com/)
+ * [Inertial Sense ROS Instructions](ros/README.md)
 
 ### Downloads
 
- * [SDK Example Projects]( https://github.com/inertialsense/inertial-sense-sdk/tree/release/ExampleProjects) - Compliable source code projects that demonstrations of how to use the SDK.
+ * [SDK Example Projects]( https://github.com/inertialsense/inertial-sense-sdk/tree/release/ExampleProjects) - Source code projects that demonstrations of how to use the SDK.
  * [Software Releases](https://github.com/inertialsense/inertial-sense-sdk/releases) - uINS, uAHRS, uIMU, and EVB-2 firmware and application installers.
- * [SDK & CLTool Source Code](https://github.com/inertialsense/inertial-sense-sdk) - open source SDK repository with command line tool and example C/C++ source code.
+ * [SDK & CLTool Source Code](https://github.com/inertialsense/inertial-sense-sdk) - Open source SDK repository with command line tool and example C/C++ source code.
 
 ### Hardware Design Files
 
- * [IS-hdw repository](https://github.com/inertialsense/IS-hdw) CAD models of our products and PCB design assets for integration
+ * [IS-hdw repository](https://github.com/inertialsense/IS-hdw) - CAD models of our products and PCB design assets for integration.
 
 ### Support
 
@@ -36,7 +39,7 @@ The [Inertial Sense software development kit (SDK)](https://github.com/inertials
 
 **MIT LICENSE**
 
-Copyright 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -46,4 +49,4 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ------
 
-(c) 2014-2022 Inertial Sense, Inc.
+(c) 2014-2023 Inertial Sense, Inc.

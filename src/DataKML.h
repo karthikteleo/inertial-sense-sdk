@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -21,7 +21,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "com_manager.h"
 
 #ifdef USE_IS_INTERNAL
-#	include "../../cpp/libs/IS_internal.h"
+#	include "../../cpp/libs/families/imx/IS_internal.h"
 #endif
 
 
@@ -32,7 +32,7 @@ struct sKmlLogData
 	float                   theta[3];
 	bool                    deadReckoning;
     sKmlLogData() {}
-	sKmlLogData(double _time, double _lla[3], float _theta[3], bool _deadReckoning)
+	sKmlLogData(double _time, double _lla[3], float _theta[3], bool _deadReckoning=false)
 	{
 		time = _time;
         lla[0] = _lla[0];
@@ -51,7 +51,7 @@ struct sKmlLogData
         lla[1] = _lla[1];
         lla[2] = _lla[2];
         theta[0] = theta[1] = theta[2] = 0;
-		deadReckoning = 0;
+		deadReckoning = false;
 	}
 };
 
@@ -75,9 +75,10 @@ public:
 		switch (did)
 		{
 		default:					return -1; // Unused
-		case DID_INS_1:				return KID_INS;
+		case DID_INS_1:				
+		case DID_INS_2:				return KID_INS;
 		case DID_GPS1_POS:			return KID_GPS;
-		case DID_GPS1_UBX_POS:		return KID_GPS1;
+		case DID_GPS1_RCVR_POS:		return KID_GPS1;
 		case DID_GPS2_POS:			return KID_GPS2;
         case DID_GPS1_RTK_POS:      return KID_RTK;
 		}
@@ -90,6 +91,7 @@ public:
         default:
             return -1; // Unused
         case KID_INS:
+        case KID_REF:
             return 130;
 		case KID_GPS:
 		case KID_GPS1:

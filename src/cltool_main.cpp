@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -35,8 +35,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // Contains command line parsing and utility functions.  Include this in your project to use these utility functions.
 #include "cltool.h"
 
+#include <signal.h>
+
 using namespace std;
 
+#if 0
+static bool g_killThreadsNow = false;
+#endif
 
 static void display_server_client_status(InertialSense* i, bool server=false, bool showMessageSummary=false, bool refreshDisplay=false)
 {
@@ -309,6 +314,7 @@ static bool cltool_setupCommunications(InertialSense& inertialSenseInterface)
 	return true;
 }
 
+#if 0
 std::vector<ISBootloader::cISBootloaderBase*> firmwareProgressContexts;
 
 is_operation_result bootloadUpdateCallback(void* obj, float percent);
@@ -372,11 +378,33 @@ void printProgress()
 
 	cISBootloaderThread::m_ctx_mutex.unlock();
 
-	if (divisor) {
+	if (divisor) 
+	{
 		total /= divisor;
 		int display = (int)(total * 100);
-		printf("Progress: %d%%\r", display);
+#if 0
+		// Print progress in one spot using \r.  In some terminals it causes scolling of new lines.   
+		printf("Progress: %d%%\r", display);	
 		fflush(stdout);
+#else
+		// Print progress in condensed format.
+		static int displayLast = 0;
+#define DISPLAY_RES		5
+		if (display == displayLast && display!=0)
+		{
+			printf("%d%% ", display);
+		}
+		fflush(stdout);
+
+		while (display < displayLast)
+		{	// Decrement
+			displayLast -= DISPLAY_RES;
+		}
+		while (display >= displayLast)
+		{	// Increment
+			displayLast += DISPLAY_RES;
+		}
+#endif
 	}
 
 	print_mutex.unlock();
@@ -384,18 +412,23 @@ void printProgress()
 
 is_operation_result bootloadUpdateCallback(void* obj, float percent)
 {
-	ISBootloader::cISBootloaderBase* ctx = (ISBootloader::cISBootloaderBase*)obj;
-	ctx->m_update_progress = percent;
-
-	return IS_OP_OK;
+	if(obj)
+	{
+		ISBootloader::cISBootloaderBase* ctx = (ISBootloader::cISBootloaderBase*)obj;
+		ctx->m_update_progress = percent;
+	}
+	return g_killThreadsNow ? IS_OP_CANCELLED : IS_OP_OK;
 }
 
 is_operation_result bootloadVerifyCallback(void* obj, float percent)
 {
-	ISBootloader::cISBootloaderBase* ctx = (ISBootloader::cISBootloaderBase*)obj;
-	ctx->m_verify_progress = percent;
+	if(obj)
+	{
+		ISBootloader::cISBootloaderBase* ctx = (ISBootloader::cISBootloaderBase*)obj;
+		ctx->m_verify_progress = percent;
+	}
 
-	return IS_OP_OK;
+	return g_killThreadsNow ? IS_OP_CANCELLED : IS_OP_OK;
 }
 
 void cltool_bootloadUpdateInfo(void* obj, const char* str, ISBootloader::eLogLevel level)
@@ -436,6 +469,7 @@ void cltool_firmwareUpdateWaiter()
 {
 	printProgress();
 }
+#endif
 
 static int cltool_createHost()
 {
@@ -483,15 +517,25 @@ static int cltool_createHost()
 
 	// close the interface cleanly, this ensures serial port and any logging are shutdown properly
 	inertialSenseInterface.Close();
+	inertialSenseInterface.CloseServerConnection();
 	
 	return 0;
 }
+
+#if 0
+static void sigint_cb(int sig)
+{
+	g_killThreadsNow = true;
+	cltool_bootloadUpdateInfo(NULL, "Update cancelled, killing threads and exiting...", ISBootloader::eLogLevel::IS_LOG_LEVEL_ERROR);
+	signal(SIGINT, SIG_DFL);
+}
+#endif
 
 static int inertialSenseMain()
 {	
 	// clear display
 	g_inertialSenseDisplay.SetDisplayMode((cInertialSenseDisplay::eDisplayMode)g_commandLineOptions.displayMode);
-	g_inertialSenseDisplay.SetKeyboardNonBlock();
+	g_inertialSenseDisplay.SetKeyboardNonBlocking();
 	g_inertialSenseDisplay.Clear();
 
 	// if replay data log specified on command line, do that now and return
@@ -503,7 +547,13 @@ static int inertialSenseMain()
 	// if app firmware was specified on the command line, do that now and return
 	else if (g_commandLineOptions.updateAppFirmwareFilename.length() != 0)
 	{
+#if 0
+		signal(SIGINT, sigint_cb);
 		return cltool_updateFirmware();
+#else
+		cout << "This version of cltool does not allow firmware updates" << endl;
+#endif
+	
 	}
 	else if (g_commandLineOptions.updateBootloaderFilename.length() != 0)
 	{
@@ -556,6 +606,7 @@ static int inertialSenseMain()
 			{
 				cout << "Failed to setup logger!" << endl;
 				inertialSenseInterface.Close();
+				inertialSenseInterface.CloseServerConnection();
 				return -1;
 			}
 			try
@@ -595,6 +646,7 @@ static int inertialSenseMain()
 		// [C++ COMM INSTRUCTION] STEP 6: Close interface
 		// Close cleanly to ensure serial port and logging are shutdown properly.  (optional)
 		inertialSenseInterface.Close();
+		inertialSenseInterface.CloseServerConnection();
 	}
 
 	return 0;

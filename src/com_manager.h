@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -94,6 +94,10 @@ typedef struct
 	*/
 	uint8_t flags;
 
+	/** info needed to retry after a message send failure */
+	int16_t retryCount;
+	protocol_type_t ptype_retry;
+
 } com_manager_status_t;
 
 /** Buffers used in com manager */
@@ -107,9 +111,15 @@ typedef struct
 
 } com_manager_init_t;
 
+enum eComManagerErrorType
+{
+	CM_ERROR_FORWARD_OVERRUN = -1, 
+	CM_ERROR_RX_PARSE = -2,
+};
+
 /** Maximum number of messages that may be broadcast simultaneously, per port.
 Since most messages use the RMC (real-time message controller) now, this can be fairly low */
-#define MAX_NUM_BCAST_MSGS 4
+#define MAX_NUM_BCAST_MSGS 12
 
 // Convenience macros for creating Com Manager buffers
 #define COM_MANAGER_BUF_SIZE_BCAST_MSG(max_num_bcast_msgs)		((max_num_bcast_msgs)*sizeof(broadcast_msg_t))
@@ -247,6 +257,9 @@ typedef struct
 
 	// Message handler - RTCM3
 	pfnComManagerGenMsgHandler cmMsgHandlerRtcm3;
+	
+	// Message handler - SPARTN
+	pfnComManagerGenMsgHandler cmMsgHandlerSpartn;
 
 } com_manager_t;
 
@@ -531,12 +544,14 @@ void comManagerSetCallbacks(
 	pfnComManagerAsapMsg rmcHandler,
 	pfnComManagerGenMsgHandler asciiHandler,
 	pfnComManagerGenMsgHandler ubloxHandler, 
-	pfnComManagerGenMsgHandler rtcm3Handler);
+	pfnComManagerGenMsgHandler rtcm3Handler,
+	pfnComManagerGenMsgHandler spartnHandler);
 void comManagerSetCallbacksInstance(CMHANDLE cmInstance, 
 	pfnComManagerAsapMsg rmcHandler,
 	pfnComManagerGenMsgHandler asciiHandler,
 	pfnComManagerGenMsgHandler ubloxHandler,
-	pfnComManagerGenMsgHandler rtcm3Handler);
+	pfnComManagerGenMsgHandler rtcm3Handler,
+	pfnComManagerGenMsgHandler spartnHandler);
 
 /**
 Attach user defined data to a com manager instance

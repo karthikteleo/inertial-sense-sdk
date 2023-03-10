@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -12,6 +12,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #include "protocol_nmea.h"
 #include "InertialSense.h"
+
+#define EXCLUDE_BOOTLOADER	// TODO: Remove after bootloader is fixed
 #ifndef EXCLUDE_BOOTLOADER
 #include "ISBootloaderThread.h"
 #include "ISBootloaderDFU.h"
@@ -93,7 +95,7 @@ static void staticProcessRxData(CMHANDLE cmHandle, int pHandle, p_data_t* data)
 			gps_pos_t &gps = *((gps_pos_t*)data->buf);
 			if ((gps.status&GPS_STATUS_FIX_MASK) >= GPS_STATUS_FIX_3D)
 			{
-				*s->clientBytesToSend = gps_to_nmea_gga(s->clientBuffer, s->clientBufferSize, gps);
+				*s->clientBytesToSend = did_gps_to_nmea_gga(s->clientBuffer, s->clientBufferSize, gps);
 			}
 		}
 	}
@@ -125,8 +127,8 @@ InertialSense::InertialSense(pfnHandleBinaryData callback) : m_tcpServer(this)
 
 InertialSense::~InertialSense()
 {
-	CloseServerConnection();
 	Close();
+	CloseServerConnection();	
 }
 
 bool InertialSense::EnableLogging(const string& path, cISLogger::eLogType logType, float maxDiskSpacePercent, uint32_t maxFileSize, const string& subFolder)
@@ -259,23 +261,6 @@ void InertialSense::StepLogger(InertialSense* i, const p_data_t* data, int pHand
 	}
 }
 
-bool InertialSense::Open(const char* port, int baudRate, bool disableBroadcastsOnClose)
-{
-	// null com port, just use other features of the interface like ntrip
-	if (port[0] == '0' && port[1] == '\0')
-	{
-		return true;
-	}
-
-	m_disableBroadcastsOnClose = false;
-	if (OpenSerialPorts(port, baudRate))
-	{
-		m_disableBroadcastsOnClose = disableBroadcastsOnClose;
-		return true;
-	}
-	return false;
-}
-
 bool InertialSense::SetLoggerEnabled(
     bool enable, 
     const string& path, 
@@ -361,11 +346,6 @@ bool InertialSense::CreateHost(const string& connectionString)
 	return (m_tcpServer.Open(host, atoi(port.c_str())) == 0);
 }
 
-bool InertialSense::IsOpen()
-{
-	return (m_comManagerState.devices.size() != 0 && serialPortIsOpen(&m_comManagerState.devices[0].serialPort));
-}
-
 size_t InertialSense::GetDeviceCount()
 {
 	return m_comManagerState.devices.size();
@@ -395,7 +375,7 @@ bool InertialSense::Update()
 	{
 		if (!serialPortIsOpen(&m_comManagerState.devices[i].serialPort))
 		{
-			Close();
+			CloseSerialPorts();
 			return false;
 		}
 	}
@@ -452,8 +432,8 @@ bool InertialSense::UpdateServer()
 			case _PTYPE_PARSE_ERROR:
 				break;
 
-			case _PTYPE_INERTIAL_SENSE_DATA:
-			case _PTYPE_INERTIAL_SENSE_CMD:
+			case _PTYPE_IS_V1_DATA:
+			case _PTYPE_IS_V1_CMD:
 				id = comm->dataHdr.id;
 				break;
 
@@ -530,11 +510,15 @@ bool InertialSense::UpdateClient()
 				break;
 
 			case _PTYPE_PARSE_ERROR:
-				printf("PARSE ERROR: %d\n", error++);
+				if (error)
+				{	// Don't print first error.  Likely due to port having been closed.
+					printf("InertialSense::UpdateClient() PARSE ERROR count: %d\n", error);
+				}
+				error++;
 				break;
 
-			case _PTYPE_INERTIAL_SENSE_DATA:
-			case _PTYPE_INERTIAL_SENSE_CMD:
+			case _PTYPE_IS_V1_DATA:
+			case _PTYPE_IS_V1_CMD:
 				id = comm->dataHdr.id;
 				break;
 
@@ -569,6 +553,39 @@ bool InertialSense::UpdateClient()
 	return true;
 }
 
+void InertialSense::SetCallbacks(
+	pfnComManagerAsapMsg handlerRmc,
+	pfnComManagerGenMsgHandler handlerAscii,
+	pfnComManagerGenMsgHandler handlerUblox, 
+	pfnComManagerGenMsgHandler handlerRtcm3,
+	pfnComManagerGenMsgHandler handlerSpartn)
+{
+	// Register message hander callback functions: RealtimeMessageController (RMC) handler, ASCII (NMEA), ublox, and RTCM3.
+	comManagerSetCallbacks(handlerRmc, handlerAscii, handlerUblox, handlerRtcm3, handlerSpartn);
+}
+
+bool InertialSense::Open(const char* port, int baudRate, bool disableBroadcastsOnClose)
+{
+	// null com port, just use other features of the interface like ntrip
+	if (port[0] == '0' && port[1] == '\0')
+	{
+		return true;
+	}
+
+	m_disableBroadcastsOnClose = false;
+	if (OpenSerialPorts(port, baudRate))
+	{
+		m_disableBroadcastsOnClose = disableBroadcastsOnClose;
+		return true;
+	}
+	return false;
+}
+
+bool InertialSense::IsOpen()
+{
+	return (m_comManagerState.devices.size() != 0 && serialPortIsOpen(&m_comManagerState.devices[0].serialPort));
+}
+
 void InertialSense::Close()
 {
 	SetLoggerEnabled(false);
@@ -582,7 +599,6 @@ void InertialSense::Close()
 		serialPortClose(&m_comManagerState.devices[i].serialPort);
 	}
 	m_comManagerState.devices.clear();
-	CloseServerConnection();
 }
 
 vector<string> InertialSense::GetPorts()
@@ -742,6 +758,23 @@ is_operation_result InertialSense::BootloadFile(
 
 	cISSerialPort::GetComPorts(all_ports);
 
+	// On non-Windows systems, try to interpret each user-specified port as a symlink and find what it is pointing to
+    // TODO: This only works for "/dev/" ports
+#if !PLATFORM_IS_WINDOWS
+    for(unsigned int k = 0; k < comPorts.size(); k++)
+    {
+        char buf[PATH_MAX];
+        int newsize = readlink(comPorts[k].c_str(), buf, sizeof(buf)-1);
+        if(newsize < 0)
+        {
+            continue;
+        }
+
+        buf[newsize] = '\0';
+        comPorts[k] = "/dev/" + string(buf);
+    }
+#endif
+
 	// Get the list of ports to ignore during the bootloading process
 	sort(all_ports.begin(), all_ports.end());
 	sort(comPorts.begin(), comPorts.end());
@@ -761,16 +794,10 @@ is_operation_result InertialSense::BootloadFile(
 	#if !PLATFORM_IS_WINDOWS
 	fputs("\e[?25l", stdout);	// Turn off cursor during firmare update
 	#endif
-	
-	ISBootloader::firmwares_t files;
-	files.fw_uINS_3.path = fileName;
-	files.bl_uINS_3.path = blFileName;
-	files.fw_IMX_5.path = fileName;
-	files.bl_IMX_5.path = blFileName;
-	files.fw_EVB_2.path = fileName;
-	files.bl_EVB_2.path = blFileName;
 
-	cISBootloaderThread::set_mode_and_check_devices(comPorts, baudRate, files, uploadProgress, verifyProgress, infoProgress, waitAction);
+	printf("\n\r");
+
+	cISBootloaderThread::set_mode_and_check_devices(comPorts, baudRate, fileName, uploadProgress, verifyProgress, infoProgress, waitAction);
 
 	cISSerialPort::GetComPorts(all_ports);
 
@@ -782,8 +809,10 @@ is_operation_result InertialSense::BootloadFile(
 		ports_user_ignore.begin(), ports_user_ignore.end(),
 		back_inserter(update_ports));
 
-	cISBootloaderThread::update(update_ports, forceBootloaderUpdate, baudRate, files, uploadProgress, verifyProgress, infoProgress, waitAction);
+	cISBootloaderThread::update(update_ports, forceBootloaderUpdate, baudRate, fileName, uploadProgress, verifyProgress, infoProgress, waitAction);
 	
+	printf("\n\r");
+
 	#if !PLATFORM_IS_WINDOWS
 	fputs("\e[?25h", stdout);	// Turn cursor back on
 	#endif
@@ -835,7 +864,7 @@ void InertialSense::OnClientDisconnected(cISTcpServer* server, socket_t socket)
 
 bool InertialSense::OpenSerialPorts(const char* port, int baudRate)
 {
-	Close();
+	CloseSerialPorts();
 
 	if (port == NULLPTR || comManagerValidateBaudRate(baudRate) != 0)
 	{
@@ -897,57 +926,69 @@ bool InertialSense::OpenSerialPorts(const char* port, int baudRate)
 		return false;
 	}
 
-	// negotiate baud rate by querying device info - don't return out until it negotiates or times out
-	// if the baud rate is already correct, the request for the message should succeed very quickly
-	time_t startTime = time(0);
-
-	// try to auto-baud for up to 10 seconds, then abort if we didn't get a valid packet
-	// we wait until we get a valid serial number and manufacturer
-	while (!HasReceivedResponseFromAllDevices() && time(0) - startTime < 10)
+	if (m_enableDeviceValidation)
 	{
-		for (size_t i = 0; i < m_comManagerState.devices.size(); i++)
+		// negotiate baud rate by querying device info - don't return out until it negotiates or times out
+		// if the baud rate is already correct, the request for the message should succeed very quickly
+		time_t startTime = time(0);
+
+		// try to auto-baud for up to 10 seconds, then abort if we didn't get a valid packet
+		// we wait until we get a valid serial number and manufacturer
+		while (!HasReceivedResponseFromAllDevices() && (time(0) - startTime < 10))
 		{
-			comManagerGetData((int)i, DID_SYS_CMD, 0, 0, 0);
-			comManagerGetData((int)i, DID_DEV_INFO, 0, 0, 0);
-			comManagerGetData((int)i, DID_FLASH_CONFIG, 0, 0, 0);
-			comManagerGetData((int)i, DID_EVB_FLASH_CFG, 0, 0, 0);
+			for (size_t i = 0; i < m_comManagerState.devices.size(); i++)
+			{
+				comManagerGetData((int)i, DID_SYS_CMD, 0, 0, 0);
+				comManagerGetData((int)i, DID_DEV_INFO, 0, 0, 0);
+				comManagerGetData((int)i, DID_FLASH_CONFIG, 0, 0, 0);
+				comManagerGetData((int)i, DID_EVB_FLASH_CFG, 0, 0, 0);
+			}
+
+			SLEEP_MS(13);
+			comManagerStep();
 		}
 
-		SLEEP_MS(13);
-		comManagerStep();
-	}
+		bool removedSerials = false;
 
-	bool removedSerials = false;
-
-	// remove each failed device where communications were not received
-	for (int i = ((int)m_comManagerState.devices.size() - 1); i >= 0; i--)
-	{
-		if (!HasReceivedResponseFromDevice(i))
+		// remove each failed device where communications were not received
+		for (int i = ((int)m_comManagerState.devices.size() - 1); i >= 0; i--)
 		{
-			RemoveDevice(i);
+			if (!HasReceivedResponseFromDevice(i))
+			{
+				RemoveDevice(i);
+				removedSerials = true;
+			}
+		}
+
+		// if no devices left, all failed, we return failure
+		if (m_comManagerState.devices.size() == 0)
+		{
+			CloseSerialPorts();
+			return false;
+		}
+
+		// remove ports if we are over max count
+		while (m_comManagerState.devices.size() > maxCount)
+		{
+			RemoveDevice(m_comManagerState.devices.size()-1);
 			removedSerials = true;
 		}
-	}
 
-	// if no devices left, all failed, we return failure
-	if (m_comManagerState.devices.size() == 0)
-	{
-		Close();
-		return false;
-	}
-
-	// remove ports if we are over max count
-	while (m_comManagerState.devices.size() > maxCount)
-	{
-		RemoveDevice(m_comManagerState.devices.size()-1);
-		removedSerials = true;
-	}
-
-	// setup com manager again if serial ports dropped out with new count of serial ports
-	if (removedSerials)
-	{
-		comManagerInit((int)m_comManagerState.devices.size(), 10, 10, 10, staticReadPacket, staticSendPacket, 0, staticProcessRxData, 0, 0, &m_cmInit, m_cmPorts);
+		// setup com manager again if serial ports dropped out with new count of serial ports
+		if (removedSerials)
+		{
+			comManagerInit((int)m_comManagerState.devices.size(), 10, 10, 10, staticReadPacket, staticSendPacket, 0, staticProcessRxData, 0, 0, &m_cmInit, m_cmPorts);
+		}
 	}
 
     return m_comManagerState.devices.size() != 0;
+}
+
+void InertialSense::CloseSerialPorts()
+{
+	for (size_t i = 0; i < m_comManagerState.devices.size(); i++)
+	{
+		serialPortClose(&m_comManagerState.devices[i].serialPort);
+	}
+	m_comManagerState.devices.clear();
 }

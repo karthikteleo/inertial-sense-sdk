@@ -19,15 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\hw-libs\bootloader\bootloaderShared.c" />
     <ClCompile Include="..\..\..\src\data_sets.c" />
     <ClCompile Include="..\..\..\src\ihex.c" />
-    <ClCompile Include="..\..\..\src\ISBootloaderAPP.cpp" />
+    <!-- <ClCompile Include="..\..\..\src\ISBootloaderAPP.cpp" />
     <ClCompile Include="..\..\..\src\ISBootloaderBase.cpp" />
     <ClCompile Include="..\..\..\src\ISBootloaderDFU.cpp" />
-    <ClCompile Include="..\..\..\src\ISBootloaderISB.cpp" />
-    <ClCompile Include="..\..\..\src\ISBootloaderSAMBA.cpp" />
-    <ClCompile Include="..\..\..\src\ISBootloaderThread.cpp" />
+    <ClCompile Include="..\..\..\src\ISBootloaderThread.cpp" /> -->
     <ClCompile Include="..\..\..\src\ISComm.c" />
     <ClCompile Include="..\..\..\src\ISSerialPort.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -50,14 +47,12 @@
     <ClCompile Include="..\ISBootloaderExample.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\hw-libs\bootloader\bootloaderShared.h" />
+    <ClInclude Include="..\..\..\hw-libs\firmwareSignature.h" />
     <ClInclude Include="..\..\..\src\data_sets.h" />
     <ClInclude Include="..\..\..\src\ihex.h" />
     <ClInclude Include="..\..\..\src\ISBootloaderAPP.h" />
     <ClInclude Include="..\..\..\src\ISBootloaderBase.h" />
     <ClInclude Include="..\..\..\src\ISBootloaderDFU.h" />
-    <ClInclude Include="..\..\..\src\ISBootloaderISB.h" />
-    <ClInclude Include="..\..\..\src\ISBootloaderSAMBA.h" />
     <ClInclude Include="..\..\..\src\ISBootloaderThread.h" />
     <ClInclude Include="..\..\..\src\ISComm.h" />
     <ClInclude Include="..\..\..\src\ISSerialPort.h" />

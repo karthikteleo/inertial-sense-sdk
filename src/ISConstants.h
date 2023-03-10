@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -144,7 +144,7 @@ extern void vPortFree(void* pv);
 #endif 
 
 #if PLATFORM_IS_EMBEDDED
-#include "../hw-libs/printf/printf.h"	// Use embedded-safe SNPRINTF
+#include "printf.h"		// Use embedded-safe SNPRINTF
 #define SNPRINTF snprintf_
 #else
 #define SNPRINTF snprintf
@@ -556,6 +556,9 @@ extern void vPortFree(void* pv);
 #define C_RAD2DEG       57.295779513082320876798154814105
 #define C_RAD2DEG_F     57.295779513082320876798154814105f
 
+#define C_KMPH2MPS      0.277777777777777777
+#define C_KMPH2MPS_F    0.277777777777777777f
+
 #define C_MM2M           0.001
 #define C_MM2M_F         0.001f
 #define C_M2MM        1000.0
@@ -778,6 +781,8 @@ extern void vPortFree(void* pv);
 #define _ZERO		0.0f
 
 #define FLOAT2DOUBLE (double) // Used to prevent warning when compiling with -Wdouble-promotion in Linux
+
+#define REF_INS_SERIAL_NUMBER			99999										// 10101 was prior value
 
 typedef float       f_t;
 typedef int			i_t;

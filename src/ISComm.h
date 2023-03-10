@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -74,15 +74,21 @@ extern "C" {
 /** Protocol Type */
 typedef enum
 {
-	_PTYPE_NONE                 = 0,						/** No complete valid data available yet */
-	_PTYPE_PARSE_ERROR          = 0xFFFFFFFF,				/** Invalid data or checksum error */
-	_PTYPE_INERTIAL_SENSE_DATA  = 0xEFFFFFFF,				/** Protocol Type: Inertial Sense binary data (PID_SET_DATA, PID_DATA) */
-	_PTYPE_INERTIAL_SENSE_CMD   = 0xDFFFFFFF,				/** Protocol Type: Inertial Sense binary command (PID_GET_DATA, PID_STOP_BROADCASTS...) */
-	_PTYPE_INERTIAL_SENSE_ACK   = 0xCFFFFFFF,				/** Protocol Type: Inertial Sense binary acknowledge (ack) or negative acknowledge (PID_ACK, PID_NACK)  */
-	_PTYPE_ASCII_NMEA           = 0xBFFFFFFF,				/** Protocol Type: ASCII NMEA (National Marine Electronics Association) */
-	_PTYPE_UBLOX                = 0xAFFFFFFF,				/** Protocol Type: uBlox binary */
-	_PTYPE_RTCM3                = 0x9FFFFFFF,				/** Protocol Type: RTCM3 binary (Radio Technical Commission for Maritime Services) */
+	_PTYPE_PARSE_ERROR = 0xFFFFFFFF,		/** Invalid data or checksum error */
+	_PTYPE_NONE = 0,						/** No complete valid data available yet */
+	_PTYPE_INERTIAL_SENSE_DATA,				/** Protocol Type: Inertial Sense binary data (PID_SET_DATA, PID_DATA) */
+	_PTYPE_INERTIAL_SENSE_CMD,				/** Protocol Type: Inertial Sense binary command (PID_GET_DATA, PID_STOP_BROADCASTS...) */
+	_PTYPE_INERTIAL_SENSE_ACK,				/** Protocol Type: Inertial Sense binary acknowledge (ack) or negative acknowledge (PID_ACK, PID_NACK)  */
+	_PTYPE_ASCII_NMEA,						/** Protocol Type: ASCII NMEA (National Marine Electronics Association) */
+	_PTYPE_UBLOX,							/** Protocol Type: uBlox binary */
+	_PTYPE_RTCM3,							/** Protocol Type: RTCM3 binary */
+	_PTYPE_SPARTN,							/** Protocol Type: SPARTN binary */
+	_PTYPE_SONY,							/** Protocol Type: Sony binary */
 } protocol_type_t;
+
+#define _PTYPE_IS_V1_CMD 	_PTYPE_INERTIAL_SENSE_CMD
+#define _PTYPE_IS_V1_DATA 	_PTYPE_INERTIAL_SENSE_DATA
+#define _PTYPE_IS_V1_ACK 	_PTYPE_INERTIAL_SENSE_ACK
 
 /** uINS default baud rate */
 #define IS_COM_BAUDRATE_DEFAULT IS_BAUDRATE_921600
@@ -294,7 +300,13 @@ enum ePktSpecialChars
 	UBLOX_START_BYTE2 = 0x62,
 
 	/** Rtcm3 start byte (211) */
-	RTCM3_START_BYTE = 0xD3
+	RTCM3_START_BYTE = 0xD3,
+
+	/** SPARTN start byte */
+	SPARTN_START_BYTE = 0x73,
+
+	/** Sony GNSS start byte */
+	SONY_START_BYTE = 0x7F,
 };
 
 /** Represents an ASCII message and how it is mapped to a structure in memory */
@@ -467,19 +479,20 @@ typedef struct
 
 } is_comm_buffer_t;
 
+typedef enum
+{
+	ENABLE_PROTOCOL_ISB = 0x00000001,
+	ENABLE_PROTOCOL_ASCII = 0x00000002,
+	ENABLE_PROTOCOL_UBLOX = 0x00000004,
+	ENABLE_PROTOCOL_RTCM3 = 0x00000008,
+	ENABLE_PROTOCOL_SPARTN = 0x00000010,
+	ENABLE_PROTOCOL_SONY = 0x00000020,
+} eProtocolMask;
+
 typedef struct  
 {
-	/** Enable protocol parsing: Inertial Sense binary */
-	uint8_t enableISB;
-
-	/** Enable protocol parsing: ASCII NMEA */
-	uint8_t enableASCII;
-
-	/** Enable protocol parsing: ublox */
-	uint8_t enableUblox;
-
-	/** Enable protocol parsing: RTCM3 */
-	uint8_t enableRTCM3;
+	/** See eProtocolMask */
+	uint32_t enabledMask;
 } is_comm_config_t;
 
 /** An instance of an is_comm interface.  Do not modify these values. */
@@ -523,6 +536,9 @@ typedef struct
 
 	/** IS binary packet */
 	packet_t pkt;
+
+	/** Retries left before moving to next packet */
+	uint8_t retries;
 
 } is_comm_instance_t;
 

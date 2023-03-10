@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -32,7 +32,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "ISConstants.h"
 
 #ifdef USE_IS_INTERNAL
-#	include "../../cpp/libs/IS_internal.h"
+#	include "../../cpp/libs/families/imx/IS_internal.h"
 #endif
 
 
@@ -67,6 +67,7 @@ int cDataKML::WriteDataToFile(std::vector<sKmlLogData>& list, const p_data_hdr_t
 	uDatasets& d = (uDatasets&)(*dataBuf);
 	ixEuler theta;
     sKmlLogData data;
+	bool deadreckoning = false;
 
 #ifdef USE_IS_INTERNAL
 // 	uInternalDatasets &i = (uInternalDatasets&)(*dataBuf);
@@ -79,18 +80,21 @@ int cDataKML::WriteDataToFile(std::vector<sKmlLogData>& list, const p_data_hdr_t
         return 0;
 
 	case DID_INS_1:
-        data = sKmlLogData(d.ins1.timeOfWeek, d.ins1.lla, d.ins1.theta, !(d.ins1.insStatus & INS_STATUS_GPS_AIDING_POS));
+		deadreckoning = !(d.ins1.insStatus & INS_STATUS_GPS_AIDING_POS);
+        data = sKmlLogData(d.ins1.timeOfWeek, d.ins1.lla, d.ins1.theta, deadreckoning);
 		break;
 	case DID_INS_2:
 		quat2euler(d.ins2.qn2b, theta);
-        data = sKmlLogData(d.ins2.timeOfWeek, d.ins2.lla, theta, !(d.ins2.insStatus & INS_STATUS_GPS_AIDING_POS));
+		deadreckoning = !(d.ins2.insStatus & INS_STATUS_GPS_AIDING_POS);
+        data = sKmlLogData(d.ins2.timeOfWeek, d.ins2.lla, theta, deadreckoning);
 		break;
 	case DID_INS_3:
 		quat2euler(d.ins3.qn2b, theta);
-        data = sKmlLogData(d.ins3.timeOfWeek, d.ins3.lla, theta, !(d.ins3.insStatus & INS_STATUS_GPS_AIDING_POS));
+		deadreckoning = !(d.ins3.insStatus & INS_STATUS_GPS_AIDING_POS);
+        data = sKmlLogData(d.ins3.timeOfWeek, d.ins3.lla, theta, deadreckoning);
 		break;
 	case DID_GPS1_POS:
-	case DID_GPS1_UBX_POS:
+	case DID_GPS1_RCVR_POS:
 	case DID_GPS2_POS:
         data = sKmlLogData(d.gpsPos.timeOfWeekMs, d.gpsPos.lla);
 		break;

@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -375,7 +375,7 @@ uint64_t getTickCount(void)
 
 #elif PLATFORM_IS_EVB_2
 
-    return time_ticks();
+    return time_ticks_u64();
 
 #else
 
@@ -670,47 +670,6 @@ uint32_t dateToWeekDay(uint32_t ul_year, uint32_t ul_month, uint32_t ul_day)
     return ul_week;
 }
 
-gen_1axis_sensor_t gen1AxisSensorData(double time, const float val)
-{
-    gen_1axis_sensor_t data;
-    data.time = time;
-    data.val = val;
-    return data;
-}
-
-gen_3axis_sensor_t gen3AxisSensorData(double time, const float val[3])
-{
-    gen_3axis_sensor_t data;
-    data.time = time;
-    data.val[0] = val[0];
-    data.val[1] = val[1];
-    data.val[2] = val[2];
-    return data;
-}
-
-gen_dual_3axis_sensor_t genDual3AxisSensorData(double time, const float val1[3], const float val2[3])
-{
-    gen_dual_3axis_sensor_t data;
-    data.time = time;
-    data.val1[0] = val1[0];
-    data.val1[1] = val1[1];
-    data.val1[2] = val1[2];
-    data.val2[0] = val2[0];
-    data.val2[1] = val2[1];
-    data.val2[2] = val2[2];
-    return data;
-}
-
-gen_3axis_sensord_t gen3AxisSensorDataD(double time, const double val[3])
-{
-    gen_3axis_sensord_t data;
-    data.time = time;
-    data.val[0] = val[0];
-    data.val[1] = val[1];
-    data.val[2] = val[2];
-    return data;
-}
-
 #ifdef __cplusplus
 } // extern C
 #endif
@@ -745,4 +704,16 @@ cMutexLocker::cMutexLocker(cMutex* mutex)
 cMutexLocker::~cMutexLocker()
 {
 	m_mutex->Unlock();
+}
+
+void advance_cursor(void) 
+{
+	static unsigned int timeLast = current_timeMs();
+	if(current_timeMs() - timeLast < 50U) return; 
+	timeLast = current_timeMs();
+	static int pos=0;
+	char cursor[4]={'/','-','\\','|'};
+	printf("%c\b", cursor[pos]);
+	fflush(stdout);
+	pos = (pos+1) % 4;
 }

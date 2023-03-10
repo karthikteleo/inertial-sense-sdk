@@ -140,9 +140,6 @@
     <ClCompile Include="..\..\src\ihex.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\hw-libs\bootloader\bootloaderShared.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\libusb\libusb\core.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -176,7 +173,7 @@
     <ClCompile Include="..\..\src\libusb\libusb\os\windows_winusb.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ISBootloaderAPP.cpp">
+    <!-- <ClCompile Include="..\..\src\ISBootloaderAPP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\ISBootloaderBase.cpp">
@@ -185,15 +182,9 @@
     <ClCompile Include="..\..\src\ISBootloaderDFU.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ISBootloaderISB.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ISBootloaderSAMBA.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\ISBootloaderThread.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
+    </ClCompile> -->
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -339,7 +330,7 @@
     <ClInclude Include="..\..\src\ihex.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\hw-libs\bootloader\bootloaderShared.h">
+    <ClInclude Include="..\..\hw-libs\firmwareSignature.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\libusb\libusb\libusb.h">
@@ -376,12 +367,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\ISBootloaderDFU.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\ISBootloaderISB.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\ISBootloaderSAMBA.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\ISBootloaderThread.h">

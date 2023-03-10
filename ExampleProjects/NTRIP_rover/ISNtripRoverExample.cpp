@@ -42,7 +42,7 @@ int stop_message_broadcasting(serial_port_t *serialPort, is_comm_instance_t *com
 
 int enable_message_broadcasting(serial_port_t *serialPort, is_comm_instance_t *comm)
 {
-	int n = is_comm_get_data(comm, _DID_GPS1_POS, 0, 0, 1);
+	int n = is_comm_get_data(comm, DID_GPS1_POS, 0, 0, 1);
 	if (n != serialPortWrite(serialPort, comm->buf.start, n))
 	{
 		printf("Failed to encode and write get GPS message\r\n");
@@ -91,7 +91,7 @@ void handle_uINS_data(is_comm_instance_t *comm, cISStream *clientStream)
 			s_rx.gps.hAcc,
 			s_rx.rel.differentialAge,	// time since last base message
 			fix.c_str(),
-			(s_rx.gps.status&GPS_STATUS_FLAGS_RTK_BASE_DATA_MISSING ? "BASE: No data" : (string("BASE: ")+to_string(s_rx.baseCount)).c_str())
+			(s_rx.gps.status&GPS_STATUS_FLAGS_GPS1_RTK_BASE_DATA_MISSING ? "BASE: No data" : (string("BASE: ")+to_string(s_rx.baseCount)).c_str())
 			 );
 
 		// Forward our position via GGA every 5 seconds to the RTK base.
@@ -103,7 +103,7 @@ void handle_uINS_data(is_comm_instance_t *comm, cISStream *clientStream)
 			if ((s_rx.gps.status&GPS_STATUS_FIX_MASK) >= GPS_STATUS_FIX_3D)
 			{	// GPS position is valid
 				char buf[512];
-				int n = gps_to_nmea_gga(buf, sizeof(buf), s_rx.gps);
+				int n = did_gps_to_nmea_gga(buf, sizeof(buf), s_rx.gps);
 				clientStream->Write(buf, n);
 				printf("Sending position to Base: \n%s\n", string(buf,n).c_str());
 			}
@@ -133,7 +133,7 @@ void read_uINS_data(serial_port_t* serialPort, is_comm_instance_t *comm, cISStre
 		// Search comm buffer for valid packets
 		while ((ptype = is_comm_parse(comm)) != _PTYPE_NONE)
 		{
-			if (ptype == _PTYPE_INERTIAL_SENSE_DATA)
+			if (ptype == _PTYPE_IS_V1_DATA)
 			{
 				handle_uINS_data(comm, clientStream);
 			}

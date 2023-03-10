@@ -19,6 +19,7 @@ extern "C"
 #define TEST_PROTO_ASCII	1
 #define TEST_PROTO_UBLOX	1
 #define TEST_PROTO_RTCM3	1
+#define TEST_PROTO_SPARTN	1
 
 #define TASK_PERIOD_MS		1				// 1 KHz
 #if 0
@@ -111,7 +112,7 @@ int msgHandlerAscii(CMHANDLE cmHandle, int pHandle, const uint8_t* msg, int msgS
 {
 	int messageIdUInt = ASCII_MESSAGEID_TO_UINT(msg + 1);
 // 	comWrite(pHandle, line, lineLength); // echo back
-// 	time_delay(50); // give time for the echo to come back
+// 	time_delay_msec(50); // give time for the echo to come back
 
 	if (msgSize == 10)
 	{	// 4 character commands (i.e. "$STPB*14\r\n")
@@ -146,12 +147,7 @@ int msgHandlerAscii(CMHANDLE cmHandle, int pHandle, const uint8_t* msg, int msgS
 	{	// General ASCII messages
 		switch (messageIdUInt)
 		{
-		case ASCII_MSG_ID_NELB: // SAM bootloader assistant (SAM-BA) enable
-// 			if (msgSize == 22 &&	// 16 character commands (i.e. "$NELB,!!SAM-BA!!\0*58\r\n")
-// 				(pHandle == COM0_PORT_NUM || pHandle == USB_PORT_NUM) &&
-// 				strncmp((const char*)(msg + 6), "!!SAM-BA!!", 6) == 0)
-// 			{
-// 			}
+		default:
 			break;
 		}
 	}
@@ -266,13 +262,14 @@ bool initComManager(test_data_t &t)
 	comManagerRegisterInstance(&(t.cm), DID_DEV_INFO, prepDevInfo, 0, &(t.msgs.devInfo), 0, sizeof(dev_info_t), 0);
 	comManagerRegisterInstance(&(t.cm), DID_FLASH_CONFIG, 0, writeNvrUserpageFlashCfg, &t.msgs.nvmFlashCfg, 0, sizeof(nvm_flash_cfg_t), 0);
 
-	comManagerSetCallbacksInstance(&(t.cm), NULL, msgHandlerAscii, msgHandlerUblox, msgHandlerRtcm3);
+	comManagerSetCallbacksInstance(&(t.cm), NULL, msgHandlerAscii, msgHandlerUblox, msgHandlerRtcm3, NULLPTR);
 
 	// Enable/disable protocols
-	s_cmPort.comm.config.enableISB = TEST_PROTO_IS;
-	s_cmPort.comm.config.enableASCII = TEST_PROTO_ASCII;
-	s_cmPort.comm.config.enableUblox = TEST_PROTO_UBLOX;
-	s_cmPort.comm.config.enableRTCM3 = TEST_PROTO_RTCM3;
+	s_cmPort.comm.config.enabledMask |= (uint32_t)(ENABLE_PROTOCOL_ISB * TEST_PROTO_IS);
+	s_cmPort.comm.config.enabledMask |= (uint32_t)(ENABLE_PROTOCOL_ASCII * TEST_PROTO_ASCII);
+	s_cmPort.comm.config.enabledMask |= (uint32_t)(ENABLE_PROTOCOL_UBLOX * TEST_PROTO_UBLOX);
+	s_cmPort.comm.config.enabledMask |= (uint32_t)(ENABLE_PROTOCOL_RTCM3 * TEST_PROTO_RTCM3);
+	s_cmPort.comm.config.enabledMask |= (uint32_t)(ENABLE_PROTOCOL_SPARTN * TEST_PROTO_SPARTN);
 
 	return true;
 }
@@ -330,14 +327,14 @@ void generateData(std::deque<data_holder_t> &testDeque)
 			{	// ASCII
 #if TEST_PROTO_ASCII
 				td.ptype = _PTYPE_ASCII_NMEA;
-				td.size = ins1_to_nmea_pins1((char*)td.data.buf, sizeof(td.data.buf), ins1);
+				td.size = did_ins1_to_nmea_pins1((char*)td.data.buf, sizeof(td.data.buf), ins1);
 #endif
 			}
 			else
 			{	// Binary
 #if TEST_PROTO_IS
 				td.did = DID_INS_1;
-				td.ptype = _PTYPE_INERTIAL_SENSE_DATA;
+				td.ptype = _PTYPE_IS_V1_DATA;
 				td.data.set.ins1 = ins1;
 				td.size = sizeof(ins_1_t);
 #endif
@@ -366,14 +363,14 @@ void generateData(std::deque<data_holder_t> &testDeque)
 			{	// ASCII
 #if TEST_PROTO_ASCII
 				td.ptype = _PTYPE_ASCII_NMEA;
-				td.size = gps_to_nmea_gga((char*)td.data.buf, sizeof(td.data.buf), gps);
+				td.size = did_gps_to_nmea_gga((char*)td.data.buf, sizeof(td.data.buf), gps);
 #endif
 			}
 			else
 			{	// Binary
 #if TEST_PROTO_IS
 				td.did = DID_GPS1_POS;
-				td.ptype = _PTYPE_INERTIAL_SENSE_DATA;
+				td.ptype = _PTYPE_IS_V1_DATA;
 				td.data.set.gpsPos = gps;
 				td.size = sizeof(gps_pos_t);
 #endif
@@ -530,9 +527,9 @@ void addDequeToRingBuf(std::deque<data_holder_t> &testDeque, ring_buf_t *rbuf)
 		// Add packetized data to ring buffer
 		switch (td.ptype)
 		{
-		case _PTYPE_INERTIAL_SENSE_DATA:
+		case _PTYPE_IS_V1_DATA:
 			// Packetize data 
-			n = is_comm_data(&comm, td.did, 0, td.size, (void*)&(td.data));
+			n = is_comm_set_data(&comm, td.did, 0, td.size, (void*)&(td.data));
 			td.pktSize = n;
 			EXPECT_FALSE(ringBufWrite(rbuf, comm.buf.start, n));
 			break;
@@ -571,7 +568,7 @@ void parseDataPortTxBuf(std::deque<data_holder_t> &testDeque, test_data_t &t)
 
 			switch (ptype)
 			{
-			case _PTYPE_INERTIAL_SENSE_DATA:
+			case _PTYPE_IS_V1_DATA:
 				// Found data
 				DEBUG_PRINTF("Found data: did %3d, size %3d\n", comm.dataHdr.id, comm.dataHdr.size);
 
@@ -814,7 +811,7 @@ TEST(ComManager, Evb2AltDecodeBufferTest)
 
 				switch (ptype)
 				{
-				case _PTYPE_INERTIAL_SENSE_DATA:
+				case _PTYPE_IS_V1_DATA:
 					// Found data
 					DEBUG_PRINTF("Found data: did %3d, size %3d\n", comm.dataHdr.id, comm.dataHdr.size);
 
@@ -910,7 +907,7 @@ TEST(ComManager, Evb2DataForwardTest)
 
 				switch (ptype)
 				{
-				case _PTYPE_INERTIAL_SENSE_DATA:
+				case _PTYPE_IS_V1_DATA:
 				case _PTYPE_ASCII_NMEA:
 				case _PTYPE_UBLOX:
 				case _PTYPE_RTCM3:
@@ -967,7 +964,7 @@ TEST(ComManager, Evb2DataForwardTest)
 
 				switch (ptype)
 				{
-				case _PTYPE_INERTIAL_SENSE_DATA:
+				case _PTYPE_IS_V1_DATA:
 					// Found data
 					DEBUG_PRINTF("Found data: did %3d, size %3d\n", comm.dataHdr.id, comm.dataHdr.size);
 

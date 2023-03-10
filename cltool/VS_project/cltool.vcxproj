@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -164,7 +164,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\hw-libs\bootloader\bootloaderShared.c" />
     <ClCompile Include="..\..\src\cltool.cpp" />
     <ClCompile Include="..\..\src\cltool_main.cpp" />
     <ClCompile Include="..\..\src\com_manager.c" />
@@ -182,12 +181,10 @@
     <ClCompile Include="..\..\src\DeviceLogSerial.cpp" />
     <ClCompile Include="..\..\src\DeviceLogSorted.cpp" />
     <ClCompile Include="..\..\src\ihex.c" />
-    <ClCompile Include="..\..\src\ISBootloaderAPP.cpp" />
+    <!-- <ClCompile Include="..\..\src\ISBootloaderAPP.cpp" />
     <ClCompile Include="..\..\src\ISBootloaderBase.cpp" />
     <ClCompile Include="..\..\src\ISBootloaderDFU.cpp" />
-    <ClCompile Include="..\..\src\ISBootloaderISB.cpp" />
-    <ClCompile Include="..\..\src\ISBootloaderSAMBA.cpp" />
-    <ClCompile Include="..\..\src\ISBootloaderThread.cpp" />
+    <ClCompile Include="..\..\src\ISBootloaderThread.cpp" /> -->
     <ClCompile Include="..\..\src\ISLogStats.cpp" />
     <ClCompile Include="..\..\src\libusb\libusb\core.c" />
     <ClCompile Include="..\..\src\libusb\libusb\descriptor.c" />
@@ -230,7 +227,7 @@
     <ClCompile Include="..\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\hw-libs\bootloader\bootloaderShared.h" />
+    <ClInclude Include="..\..\hw-libs\firmwareSignature.h" />
     <ClInclude Include="..\..\src\cltool.h" />
     <ClInclude Include="..\..\src\com_manager.h" />
     <ClInclude Include="..\..\src\convert_ins.h" />
@@ -250,8 +247,6 @@
     <ClInclude Include="..\..\src\ISBootloaderAPP.h" />
     <ClInclude Include="..\..\src\ISBootloaderBase.h" />
     <ClInclude Include="..\..\src\ISBootloaderDFU.h" />
-    <ClInclude Include="..\..\src\ISBootloaderISB.h" />
-    <ClInclude Include="..\..\src\ISBootloaderSAMBA.h" />
     <ClInclude Include="..\..\src\ISBootloaderThread.h" />
     <ClInclude Include="..\..\src\ISLogStats.h" />
     <ClInclude Include="..\..\src\libusb\libusb\libusb.h" />

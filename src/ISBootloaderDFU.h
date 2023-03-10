@@ -9,7 +9,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -59,14 +59,14 @@ class cISBootloaderDFU : public ISBootloader::cISBootloaderBase
 {
 public:
     cISBootloaderDFU(
-        pfnBootloadProgress upload_cb,
-        pfnBootloadProgress verify_cb,
-        pfnBootloadStatus info_cb,
+        std::string filename,
+        ISBootloader::pfnBootloadProgress upload_cb,
+        ISBootloader::pfnBootloadProgress verify_cb,
+        ISBootloader::pfnBootloadStatus info_cb,
         libusb_device_handle* handle
-    ) : cISBootloaderBase{ upload_cb, verify_cb, info_cb } 
+    ) : cISBootloaderBase{ filename, upload_cb, verify_cb, info_cb } 
     {
         m_dfu.handle_libusb = handle;
-        m_device_type = IS_DEV_TYPE_DFU;
     }
 
     ~cISBootloaderDFU() 
@@ -76,17 +76,16 @@ public:
     
     is_operation_result reboot();
     is_operation_result reboot_up();
-    is_operation_result reboot_down(uint8_t major = 0, char minor = 0, bool force = false) { (void)major; (void)minor; (void)force; return IS_OP_OK; }
 
     is_operation_result match_test(void* param);
 
     uint32_t get_device_info();
 
-    ISBootloader::eImageSignature check_is_compatible();
+    uint8_t check_is_compatible(uint32_t imgSign);
     
-    is_operation_result download_image(std::string image);
-    is_operation_result upload_image(std::string image) { return IS_OP_OK; }
-    is_operation_result verify_image(std::string image) { return IS_OP_OK; }
+    is_operation_result download_image(void);
+    is_operation_result upload_image(void) { return IS_OP_OK; }
+    is_operation_result verify_image(void) { return IS_OP_OK; }
 
     static int get_num_devices();
     static is_operation_result list_devices(is_dfu_list* list);

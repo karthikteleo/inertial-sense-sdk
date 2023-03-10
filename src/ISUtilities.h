@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -146,6 +146,15 @@ void usleep(__int64 usec);
 #define SLEEP_US(timeUs) usleep(timeUs);
 #endif
 
+// 0 for no output, 1 for verbose, 2 for spinning cursor
+#if PLATFORM_IS_EMBEDDED
+#define LOG_DEBUG_GEN			0
+#elif !defined(LOG_DEBUG_GEN)
+#define LOG_DEBUG_GEN			2
+#else
+
+#endif
+
 #endif
 
 unsigned int current_timeSec();
@@ -156,6 +165,8 @@ uint64_t timerUsStart();
 uint64_t timerUsEnd(uint64_t start);
 uint64_t timerRawStart();
 uint64_t timerRawEnd(uint64_t start);
+
+void advance_cursor(void);
 
 uint64_t getTickCount(void);
 
@@ -221,11 +232,6 @@ int32_t convertGpsToMjd(int32_t gpsWeek, int32_t gpsSeconds);
 void convertMjdToDate(int32_t mjd, int32_t* year, int32_t* month, int32_t* day);
 void convertGpsToHMS(int32_t gpsSeconds, int32_t* hour, int32_t* minutes, int32_t* seconds);
 uint32_t dateToWeekDay(uint32_t ul_year, uint32_t ul_month, uint32_t ul_day);
-
-gen_1axis_sensor_t gen1AxisSensorData(double time, const float val);
-gen_3axis_sensor_t gen3AxisSensorData(double time, const float val[3]);
-gen_dual_3axis_sensor_t genDual3AxisSensorData(double time, const float val1[3], const float val2[3]);
-gen_3axis_sensord_t gen3AxisSensorDataD(double time, const double val[3]);
 
 #ifdef __cplusplus
 } // extern C

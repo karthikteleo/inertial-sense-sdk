@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -220,10 +220,13 @@ void is_comm_init(is_comm_instance_t* instance, uint8_t *buffer, int bufferSize)
 	instance->buf.head = instance->buf.tail = instance->buf.scan = buffer;
 	
 	// Set parse enable flags
-	instance->config.enableISB = 1;
-	instance->config.enableASCII = 1;
-	instance->config.enableUblox = 1;
-	instance->config.enableRTCM3 = 1;
+	instance->config.enabledMask = 
+		ENABLE_PROTOCOL_ISB |
+		ENABLE_PROTOCOL_ASCII |
+		ENABLE_PROTOCOL_UBLOX |
+		ENABLE_PROTOCOL_RTCM3 |
+		ENABLE_PROTOCOL_SPARTN |
+		ENABLE_PROTOCOL_SONY;
 	
 	instance->txPktCount = 0;
 	instance->rxErrorCount = 0;
@@ -237,7 +240,7 @@ void is_comm_init(is_comm_instance_t* instance, uint8_t *buffer, int bufferSize)
 	instance->altDecodeBuf = NULL;
 }
 
-static __inline void reset_parser(is_comm_instance_t *instance)
+static inline void reset_parser(is_comm_instance_t *instance)
 {
 	instance->hasStartByte = 0;
 	instance->buf.head = instance->buf.scan;
@@ -388,7 +391,7 @@ static protocol_type_t processUbloxByte(is_comm_instance_t* instance)
 	case 5: // length byte 2
 		{
 			uint32_t len = BE_SWAP16(*((uint16_t*)(void*)(instance->buf.scan - 2)));
-
+	
 			// if length is greater than available buffer, we cannot parse this ublox packet - ublox header is 6 bytes
 			if (len > instance->buf.size - 6)
 			{
@@ -396,6 +399,7 @@ static protocol_type_t processUbloxByte(is_comm_instance_t* instance)
 				reset_parser(instance);
 				return _PTYPE_PARSE_ERROR;
 			}
+			
 			instance->parseState = -((int32_t)len + 2);
 		} 
 		break;
@@ -460,9 +464,10 @@ static protocol_type_t processRtcm3Byte(is_comm_instance_t* instance)
 			reset_parser(instance);
 			return _PTYPE_PARSE_ERROR;
 		}
-
+		
 		// parse the message plus 3 crc24 bytes
         instance->parseState = -((int32_t)msgLength + 3);
+
 	} break;
 
 	default:
@@ -491,6 +496,287 @@ static protocol_type_t processRtcm3Byte(is_comm_instance_t* instance)
 				return _PTYPE_PARSE_ERROR;
 			}
 		}
+	}
+
+	return _PTYPE_NONE;
+}
+
+static const uint8_t u8CRC_4_TABLE[] = {
+    0x00U, 0x0BU, 0x05U, 0x0EU, 0x0AU, 0x01U, 0x0FU, 0x04U,
+    0x07U, 0x0CU, 0x02U, 0x09U, 0x0DU, 0x06U, 0x08U, 0x03U,
+    0x0EU, 0x05U, 0x0BU, 0x00U, 0x04U, 0x0FU, 0x01U, 0x0AU,
+    0x09U, 0x02U, 0x0CU, 0x07U, 0x03U, 0x08U, 0x06U, 0x0DU,
+    0x0FU, 0x04U, 0x0AU, 0x01U, 0x05U, 0x0EU, 0x00U, 0x0BU,
+    0x08U, 0x03U, 0x0DU, 0x06U, 0x02U, 0x09U, 0x07U, 0x0CU,
+    0x01U, 0x0AU, 0x04U, 0x0FU, 0x0BU, 0x00U, 0x0EU, 0x05U,
+    0x06U, 0x0DU, 0x03U, 0x08U, 0x0CU, 0x07U, 0x09U, 0x02U,
+    0x0DU, 0x06U, 0x08U, 0x03U, 0x07U, 0x0CU, 0x02U, 0x09U,
+    0x0AU, 0x01U, 0x0FU, 0x04U, 0x00U, 0x0BU, 0x05U, 0x0EU,
+    0x03U, 0x08U, 0x06U, 0x0DU, 0x09U, 0x02U, 0x0CU, 0x07U,
+    0x04U, 0x0FU, 0x01U, 0x0AU, 0x0EU, 0x05U, 0x0BU, 0x00U,
+    0x02U, 0x09U, 0x07U, 0x0CU, 0x08U, 0x03U, 0x0DU, 0x06U,
+    0x05U, 0x0EU, 0x00U, 0x0BU, 0x0FU, 0x04U, 0x0AU, 0x01U,
+    0x0CU, 0x07U, 0x09U, 0x02U, 0x06U, 0x0DU, 0x03U, 0x08U,
+    0x0BU, 0x00U, 0x0EU, 0x05U, 0x01U, 0x0AU, 0x04U, 0x0FU,
+    0x09U, 0x02U, 0x0CU, 0x07U, 0x03U, 0x08U, 0x06U, 0x0DU,
+    0x0EU, 0x05U, 0x0BU, 0x00U, 0x04U, 0x0FU, 0x01U, 0x0AU,
+    0x07U, 0x0CU, 0x02U, 0x09U, 0x0DU, 0x06U, 0x08U, 0x03U,
+    0x00U, 0x0BU, 0x05U, 0x0EU, 0x0AU, 0x01U, 0x0FU, 0x04U,
+    0x06U, 0x0DU, 0x03U, 0x08U, 0x0CU, 0x07U, 0x09U, 0x02U,
+    0x01U, 0x0AU, 0x04U, 0x0FU, 0x0BU, 0x00U, 0x0EU, 0x05U,
+    0x08U, 0x03U, 0x0DU, 0x06U, 0x02U, 0x09U, 0x07U, 0x0CU,
+    0x0FU, 0x04U, 0x0AU, 0x01U, 0x05U, 0x0EU, 0x00U, 0x0BU,
+    0x04U, 0x0FU, 0x01U, 0x0AU, 0x0EU, 0x05U, 0x0BU, 0x00U,
+    0x03U, 0x08U, 0x06U, 0x0DU, 0x09U, 0x02U, 0x0CU, 0x07U,
+    0x0AU, 0x01U, 0x0FU, 0x04U, 0x00U, 0x0BU, 0x05U, 0x0EU,
+    0x0DU, 0x06U, 0x08U, 0x03U, 0x07U, 0x0CU, 0x02U, 0x09U,
+    0x0BU, 0x00U, 0x0EU, 0x05U, 0x01U, 0x0AU, 0x04U, 0x0FU,
+    0x0CU, 0x07U, 0x09U, 0x02U, 0x06U, 0x0DU, 0x03U, 0x08U,
+    0x05U, 0x0EU, 0x00U, 0x0BU, 0x0FU, 0x04U, 0x0AU, 0x01U,
+    0x02U, 0x09U, 0x07U, 0x0CU, 0x08U, 0x03U, 0x0DU, 0x06U
+};
+
+static uint8_t computeCrc4Ccitt(const uint8_t *buf, const uint32_t numBytes)
+{
+    // Initialize local variables
+    uint8_t tableRemainder;
+    uint8_t remainder = 0U; // Initial remainder
+
+    // Compute the CRC value
+    // Divide each byte of the message by the corresponding polynomial
+    for (uint32_t ctr = 0U; ctr < numBytes; ctr++)
+    {
+        tableRemainder = buf[ctr] ^ remainder;
+        remainder = u8CRC_4_TABLE[tableRemainder];
+    }
+
+    return remainder & 0x0FU;
+}
+
+static protocol_type_t processSonyByte(is_comm_instance_t* instance)
+{
+	switch (instance->parseState)
+	{
+	case 0:
+	case 1:
+	case 2:
+	case 3:
+		instance->parseState++;
+		break;
+
+	case 4:
+	{
+        uint16_t msgLength = instance->buf.head[1] | (instance->buf.head[2] << 8);
+
+    	uint8_t checksum = 0x00;
+		for (size_t i = 0; i < 4; i++)
+		{
+			checksum += instance->buf.head[i];
+		}
+
+		if(msgLength > 4090 || msgLength > instance->buf.size || checksum != instance->buf.head[4])
+		{
+			// corrupt data
+			instance->rxErrorCount++;
+			reset_parser(instance);
+			return _PTYPE_PARSE_ERROR;
+		}
+
+		// parse the message plus 1 check byte
+        instance->parseState = -((int32_t)msgLength + 1);
+	} break;
+
+	default:
+		if (++instance->parseState == 0)
+		{
+			uint16_t msgLength = instance->buf.head[1] | (instance->buf.head[2] << 8);
+
+			uint8_t checksum = 0x00;
+			for (size_t i = 0; i < msgLength; i++)
+			{
+				checksum += instance->buf.head[i + 5];
+			}
+
+			if(checksum != instance->buf.scan[-1])
+			{
+				// corrupt data
+				instance->rxErrorCount++;
+				reset_parser(instance);
+				return _PTYPE_PARSE_ERROR;
+			}
+			else
+			{	// Checksum passed - Valid packet
+				// Update data pointer and info
+				instance->dataPtr = instance->buf.head;
+				instance->dataHdr.id = 0;
+				instance->dataHdr.size = (uint32_t)(instance->buf.scan - instance->buf.head);
+				instance->dataHdr.offset = 0;
+				instance->pktPtr = instance->buf.head;
+				reset_parser(instance);
+				return _PTYPE_SONY;
+			}
+		}
+	}
+
+	return _PTYPE_NONE;
+}
+
+static protocol_type_t processSpartnByte(is_comm_instance_t* instance)
+{
+	switch (instance->parseState)
+	{
+	case 0:
+	case 1:
+	case 2:
+	// case 3 is below this to catch bad CRCs before any more is parsed. Can be adapted to filter messages later.
+	case 4:
+	case 5:
+	case 6:
+		instance->parseState++;
+		break;
+
+	case 3: {
+		// Check length and header CRC4
+		const uint8_t dbuf[3] = { instance->buf.head[1], instance->buf.head[2], instance->buf.head[3] & 0xF0 };
+        uint8_t calc = computeCrc4Ccitt(dbuf, 3);
+        if((instance->buf.head[3] & 0x0F) != calc)
+        {
+        	// corrupt data
+			instance->rxErrorCount++;
+			reset_parser(instance);
+			return _PTYPE_PARSE_ERROR;
+        }
+
+        instance->parseState++;
+	} break;
+
+	case 7:			// byte 7 (8th byte) is minimum header, but depending on what bits are set...
+	case 8:
+	case 9:
+	case 10:
+	case 11: {		// we may need to parse up to byte 11 (12th byte) to get the timestamp and encryption length
+		uint16_t payloadLen = ((((uint16_t)(instance->buf.head[1]) & 0x01) << 9) |
+						(((uint16_t)(instance->buf.head[2])) << 1) |
+						((instance->buf.head[3] & 0x80) >> 7)) & 0x3FF;
+
+		// Variable length CRC {0x0, 0x1, 0x2, 0x3} = {1, 2, 3, 4}bytes - appears at end of message
+		payloadLen += (((instance->buf.head[3] >> 4) & 0x03) + 1);
+
+		uint8_t extendedTs = instance->buf.head[4] & 0x08;
+		uint8_t encrypt = instance->buf.head[3] & 0x40;
+		uint8_t *encryptPtr = NULL;
+
+		if(extendedTs)
+		{
+			// Timestamp is 32 bit
+
+			if(!encrypt && instance->parseState == 9)
+			{
+				// Encryption is disabled, we are ready to go to payload bytes
+				instance->parseState = -((int32_t)payloadLen);
+				break;
+			}
+			else if(encrypt && instance->parseState == 11)
+			{
+				// Encryption is ENABLED, and we have all the bytes we need to compute the length of payload
+				encryptPtr = &instance->buf.head[10];
+				// Don't break yet; continue to calculate encryption
+			}
+			else
+			{
+				// Not ready yet
+				instance->parseState++;
+				break;
+			}
+		}
+		else
+		{
+			// Timestamp is 16 bit
+
+			if(!encrypt && instance->parseState == 7)
+			{
+				// Encryption is disabled, we are ready to go to payload bytes
+				instance->parseState = -((int32_t)payloadLen);
+				break;
+			}
+			else if(encrypt && instance->parseState == 9)
+			{
+				// Encryption is ENABLED, and we have all the bytes we need to compute the length of payload
+				encryptPtr = &instance->buf.head[8];
+				// Don't break yet; continue to calculate encryption
+			}
+			else
+			{
+				// Not ready yet
+				instance->parseState++;
+				break;
+			}
+		}
+
+		// Add encryption authentication bytes
+		if(encryptPtr)
+		{
+			// If the message contains an embedded authentication sequence, add the length
+			if(((encryptPtr[1] >> 3) & 0x07) > 1)
+			{
+				switch(encryptPtr[1] & 0x07)
+				{
+				case 0:
+					payloadLen += 8;
+					break;
+				case 1:
+					payloadLen += 12;
+					break;
+				case 2:
+					payloadLen += 16;
+					break;
+				case 3:
+					payloadLen += 32;
+					break;
+				case 4:
+					payloadLen += 64;
+					break;
+				default:
+					break;
+				}
+			}
+		}
+		else
+		{
+			// corrupt data
+			instance->rxErrorCount++;
+			reset_parser(instance);
+			return _PTYPE_PARSE_ERROR;
+		}
+
+		instance->parseState = -((int32_t)payloadLen);
+
+	} break;
+
+
+	default:
+		instance->parseState++;
+
+		if (instance->parseState == 0)
+		{
+			instance->dataPtr = instance->buf.head;
+			instance->dataHdr.id = 0;
+			instance->dataHdr.size = (uint32_t)(instance->buf.scan - instance->buf.head);
+			instance->dataHdr.offset = 0;
+			instance->pktPtr = instance->buf.head;
+			reset_parser(instance);
+
+			return _PTYPE_SPARTN;
+		}
+		else if(instance->parseState > 0)
+		{
+			// corrupt data or bad state
+			instance->rxErrorCount++;
+			reset_parser(instance);
+			return _PTYPE_PARSE_ERROR;
+		}
+
+		break;
 	}
 
 	return _PTYPE_NONE;
@@ -561,10 +847,12 @@ protocol_type_t is_comm_parse(is_comm_instance_t* instance)
 		// Check for start byte if we haven't found it yet
 		if (instance->hasStartByte == 0)
 		{
-			if ((byte == PSC_START_BYTE			&& instance->config.enableISB) ||
-				(byte == PSC_ASCII_START_BYTE	&& instance->config.enableASCII) ||
-				(byte == UBLOX_START_BYTE1		&& instance->config.enableUblox) ||
-				(byte == RTCM3_START_BYTE		&& instance->config.enableRTCM3) )
+			if((byte == PSC_START_BYTE			&& (instance->config.enabledMask & ENABLE_PROTOCOL_ISB)) ||
+				(byte == PSC_ASCII_START_BYTE	&& (instance->config.enabledMask & ENABLE_PROTOCOL_ASCII)) ||
+				(byte == UBLOX_START_BYTE1		&& (instance->config.enabledMask & ENABLE_PROTOCOL_UBLOX)) ||
+				(byte == RTCM3_START_BYTE		&& (instance->config.enabledMask & ENABLE_PROTOCOL_RTCM3)) ||
+				(byte == SPARTN_START_BYTE		&& (instance->config.enabledMask & ENABLE_PROTOCOL_SPARTN)) ||
+				(byte == SONY_START_BYTE  		&& (instance->config.enabledMask & ENABLE_PROTOCOL_SONY)))
 			{	// Found start byte.  Initialize states (set flag and reset pos to beginning)
 				instance->hasStartByte = byte; 
 				instance->buf.head = instance->buf.scan-1;
@@ -618,6 +906,27 @@ protocol_type_t is_comm_parse(is_comm_instance_t* instance)
 			{
 				return ptype;
 			}
+			break;
+		case SPARTN_START_BYTE:
+			ptype = processSpartnByte(instance);
+			if(ptype == _PTYPE_PARSE_ERROR)
+			{
+				//time_delay_usec(500);	// Temporary test code
+			}
+			else if (ptype != _PTYPE_NONE)
+			{
+				return ptype;
+			}
+			break;
+		case SONY_START_BYTE:
+			ptype = processSonyByte(instance);
+			if (ptype != _PTYPE_NONE)
+			{
+				return ptype;
+			}
+			break;
+		default:
+			break;
 		}
 	}
 

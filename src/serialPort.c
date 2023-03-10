@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -12,8 +12,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #include "serialPort.h"
 #include <stdlib.h>
+#include <stdint.h>
 
 int SERIAL_PORT_DEFAULT_TIMEOUT = 2500;
+
+void serialPortSetOptions(serial_port_t* serialPort, uint32_t options)
+{
+	if (serialPort != 0 && ((options & SERIAL_PORT_OPTIONS_MASK) == 0))
+	{
+		serialPort->options = options;
+	}
+}
 
 void serialPortSetPort(serial_port_t* serialPort, const char* port)
 {
@@ -27,7 +36,7 @@ void serialPortSetPort(serial_port_t* serialPort, const char* port)
 
 int serialPortOpen(serial_port_t* serialPort, const char* port, int baudRate, int blocking)
 {
-    if (serialPort == 0 || port == 0 || serialPort->pfnOpen == 0)
+    if (serialPort == 0 || port == 0 || serialPort->pfnOpen == 0 || ((serialPort->options & SERIAL_PORT_OPTIONS_MASK) != 0))
 	{
 		return 0;
 	}
@@ -36,7 +45,7 @@ int serialPortOpen(serial_port_t* serialPort, const char* port, int baudRate, in
 
 int serialPortOpenRetry(serial_port_t* serialPort, const char* port, int baudRate, int blocking)
 {
-    if (serialPort == 0 || port == 0 || serialPort->pfnOpen == 0)
+    if (serialPort == 0 || port == 0 || serialPort->pfnOpen == 0 || ((serialPort->options & SERIAL_PORT_OPTIONS_MASK) != 0))
     {
         return 0;
     }
@@ -309,7 +318,7 @@ int serialPortWaitForTimeout(serial_port_t* serialPort, const unsigned char* wai
 {
 	if (serialPort == 0 || serialPort->handle == 0 || waitFor == 0 || waitForLength < 1)
 	{
-		return 1;
+		return 0;
 	}
 	else if (waitForLength > 128)
 	{

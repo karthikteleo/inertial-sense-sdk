@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.9)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 project(ISLogReaderExample)
 
@@ -31,13 +31,11 @@ add_executable(ISLogReaderExample
 	../../src/DeviceLogSorted.cpp
 	../../src/ihex.c
 	../../src/InertialSense.cpp
-	../../src/ISBootloaderBase.cpp
-	../../src/ISBootloaderThread.cpp
-	../../src/ISBootloaderAPP.cpp
-	../../src/ISBootloaderISB.cpp
-	../../src/ISBootloaderDFU.cpp
-	../../src/ISBootloaderSAMBA.cpp
-	../../hw-libs/bootloader/bootloaderShared.c
+	# ../../src/ISBootloaderBase.cpp
+	# ../../src/ISBootloaderThread.cpp
+	# ../../src/ISBootloaderAPP.cpp
+	# ../../src/ISBootloaderDFU.cpp
+	../../hw-libs/firmwareSignatures.c
 	../../src/ISClient.cpp
 	../../src/ISComm.c
 	../../src/ISDataMappings.cpp

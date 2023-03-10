@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\hw-libs\bootloader\bootloaderShared.c" />
     <ClCompile Include="..\..\..\src\com_manager.c" />
     <ClCompile Include="..\..\..\src\convert_ins.cpp" />
     <ClCompile Include="..\..\..\src\DataChunk.cpp" />
@@ -36,12 +35,10 @@
     <ClCompile Include="..\..\..\src\DeviceLogSorted.cpp" />
     <ClCompile Include="..\..\..\src\ihex.c" />
     <ClCompile Include="..\..\..\src\InertialSense.cpp" />
-    <ClCompile Include="..\..\..\src\ISBootloaderAPP.cpp" />
+    <!-- <ClCompile Include="..\..\..\src\ISBootloaderAPP.cpp" />
     <ClCompile Include="..\..\..\src\ISBootloaderBase.cpp" />
     <ClCompile Include="..\..\..\src\ISBootloaderDFU.cpp" />
-    <ClCompile Include="..\..\..\src\ISBootloaderISB.cpp" />
-    <ClCompile Include="..\..\..\src\ISBootloaderSAMBA.cpp" />
-    <ClCompile Include="..\..\..\src\ISBootloaderThread.cpp" />
+    <ClCompile Include="..\..\..\src\ISBootloaderThread.cpp" /> -->
     <ClCompile Include="..\..\..\src\ISClient.cpp" />
     <ClCompile Include="..\..\..\src\ISComm.c" />
     <ClCompile Include="..\..\..\src\ISDataMappings.cpp" />
@@ -80,7 +77,7 @@
     <ClCompile Include="..\ISLoggerExample.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\hw-libs\bootloader\bootloaderShared.h" />
+    <ClInclude Include="..\..\..\hw-libs\firmwareSignature.h" />
     <ClInclude Include="..\..\..\src\com_manager.h" />
     <ClInclude Include="..\..\..\src\convert_ins.h" />
     <ClInclude Include="..\..\..\src\DataChunk.h" />
@@ -99,8 +96,6 @@
     <ClInclude Include="..\..\..\src\ISBootloaderAPP.h" />
     <ClInclude Include="..\..\..\src\ISBootloaderBase.h" />
     <ClInclude Include="..\..\..\src\ISBootloaderDFU.h" />
-    <ClInclude Include="..\..\..\src\ISBootloaderISB.h" />
-    <ClInclude Include="..\..\..\src\ISBootloaderSAMBA.h" />
     <ClInclude Include="..\..\..\src\ISBootloaderThread.h" />
     <ClInclude Include="..\..\..\src\ISClient.h" />
     <ClInclude Include="..\..\..\src\ISComm.h" />

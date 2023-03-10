@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.9)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 project(inertial-sense-sdk)
 
@@ -33,13 +33,11 @@ add_library(InertialSense
   src/filters.cpp
   src/ihex.c
   src/InertialSense.cpp
-  src/ISBootloaderBase.cpp
-  src/ISBootloaderThread.cpp
-	src/ISBootloaderAPP.cpp
-  src/ISBootloaderISB.cpp
-	src/ISBootloaderDFU.cpp
-	src/ISBootloaderSAMBA.cpp
-	hw-libs/bootloader/bootloaderShared.c
+  # src/ISBootloaderBase.cpp
+  # src/ISBootloaderThread.cpp
+	# src/ISBootloaderAPP.cpp
+	# src/ISBootloaderDFU.cpp
+	hw-libs/firmwareSignatures.c
 	src/ISClient.cpp
   src/ISComm.c
   src/ISDataMappings.cpp
@@ -68,7 +66,7 @@ add_library(InertialSense
   src/tinyxml.cpp
   src/tinyxmlerror.cpp
   src/tinyxmlparser.cpp
-  )
+)
 
 find_library(LIBUSB_LIBRARY
 	NAMES usb-1.0
@@ -83,4 +81,3 @@ add_library( InertialSense::libinertialsense ALIAS InertialSense )
 
 add_subdirectory(cltool)
 add_subdirectory(ExampleProjects)
-

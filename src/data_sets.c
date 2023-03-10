@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -281,7 +281,7 @@ uint16_t* getDoubleOffsets(eDataIDs dataId, uint16_t* offsetsLength)
 		offsetsSysParams,		// 10: DID_SYS_PARAMS
 		offsetsOnlyTimeFirst,	// 11: DID_SYS_SENSORS
 		offsetsFlashConfig,		// 12: DID_FLASH_CONFIG
-		offsetsGps,				// 13: DID_GPS1_UBX_POS
+		offsetsGps,				// 13: DID_GPS1_RCVR_POS
 		offsetsGps,				// 14: DID_GPS2_POS
 		0,						// 15: DID_GPS1_SAT
 		0,						// 16: DID_GPS2_SAT
@@ -459,7 +459,7 @@ uint16_t* getStringOffsetsLengths(eDataIDs dataId, uint16_t* offsetsLength)
 		0,						// 10: DID_SYS_PARAMS
 		0,						// 11: DID_SYS_SENSORS
 		0,						// 12: DID_FLASH_CONFIG
-		0,						// 13: DID_GPS1_UBX_POS
+		0,						// 13: DID_GPS1_RCVR_POS
 		0,						// 14: DID_GPS2_POS
 		0,						// 15: DID_GPS1_SAT
 		0,						// 16: DID_GPS2_SAT
@@ -640,7 +640,7 @@ uint64_t didToRmcBit(uint32_t dataId, uint64_t defaultRmcBits, uint64_t devInfoR
 		case DID_GPS1_RAW:				return RMC_BITS_GPS1_RAW;
 		case DID_GPS2_RAW:				return RMC_BITS_GPS2_RAW;
 		case DID_GPS_BASE_RAW:			return RMC_BITS_GPS_BASE_RAW;
-		case DID_GPS1_UBX_POS:			return RMC_BITS_GPS1_UBX_POS;
+		case DID_GPS1_RCVR_POS:			return RMC_BITS_GPS1_UBX_POS;
 		case DID_GPS1_RTK_POS:			return RMC_BITS_GPS1_RTK_POS;
 		case DID_GPS1_RTK_POS_REL:		return RMC_BITS_GPS1_RTK_POS_REL;
 		case DID_GPS1_RTK_POS_MISC:		return RMC_BITS_GPS1_RTK_POS_MISC;
@@ -659,6 +659,31 @@ uint64_t didToRmcBit(uint32_t dataId, uint64_t defaultRmcBits, uint64_t devInfoR
 		
 		case DID_DEV_INFO:				return devInfoRmcBits;		// This allows the dev info to respond instantly when first connected.
 		default:                        return defaultRmcBits;
+	}
+}
+
+// Convert DID to ASCII message out control mask
+uint32_t didToAsciiRmcBits(uint32_t dataId)
+{
+	switch (dataId)
+	{
+		case DID_IMU:					return ASCII_RMC_BITS_PIMU;
+		case DID_PIMU:					return ASCII_RMC_BITS_PPIMU;
+		case DID_IMU_RAW:				return ASCII_RMC_BITS_PRIMU;
+		case DID_INS_1:					return ASCII_RMC_BITS_PINS1;
+		case DID_INS_2:					return ASCII_RMC_BITS_PINS2;
+		case DID_GPS1_POS:				
+			return 
+				ASCII_RMC_BITS_PGPSP |
+				ASCII_RMC_BITS_GPGGA |
+				ASCII_RMC_BITS_GPGLL |
+				ASCII_RMC_BITS_GPGSA |
+				ASCII_RMC_BITS_GPRMC |
+				ASCII_RMC_BITS_GPZDA |
+				ASCII_RMC_BITS_PASHR;
+		case DID_DEV_INFO:				return ASCII_RMC_BITS_INFO;
+
+		default:                        return 0;
 	}
 }
 
@@ -800,6 +825,8 @@ static void appendGPSCoord(const gps_pos_t* gps, char** buffer, int* bufferLengt
     *buffer += written;
 }
 
+#ifndef GPX_1
+
 /* ubx gnss indicator (ref [2] 25) -------------------------------------------*/
 int ubxSys(int gnssID)
 {
@@ -865,3 +892,5 @@ int satNumCalc(int gnssID, int svID) {
 //	int prn = svID + (sys == SYS_QZS ? 192 : 0);
     return 0;// satNo(sys, prn);
 }
+
+#endif

@@ -1,14 +1,7 @@
-/**
- * @file ISBootloaderBase.h
- * @author Dave Cutting (davidcutting42@gmail.com)
- * @brief Inertial Sense base class for bootloader actions
- * 
- */
-
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -43,59 +36,27 @@ typedef enum {
 } eLogLevel;
 
 typedef enum {
-    IS_DEV_TYPE_NONE = 0,
-    IS_DEV_TYPE_SAMBA,
-    IS_DEV_TYPE_ISB,
-    IS_DEV_TYPE_APP,
-    IS_DEV_TYPE_DFU,
-} eDeviceType;
-
-typedef enum {
-    IS_PROCESSOR_SAMx70 = 0,        // IMX-5
-    IS_PROCESSOR_STM32L4,           // uINS-3/4, EVB-2
-
-    IS_PROCESSOR_NUM,               // Must be last
-} eProcessorType;
-
-typedef enum {
-    // Bootloaders must be first because bootloaders may contain app signatures
-    IS_IMAGE_SIGN_ISB_STM32L4 = 0x00000001,
-    IS_IMAGE_SIGN_ISB_SAMx70_16K = 0x00000002,
-    IS_IMAGE_SIGN_ISB_SAMx70_24K = 0x00000004,
-
-    IS_IMAGE_SIGN_UINS_3_16K = 0x00000008,
-    IS_IMAGE_SIGN_UINS_3_24K = 0x00000010,
-    IS_IMAGE_SIGN_EVB_2_16K = 0x00000020,
-    IS_IMAGE_SIGN_EVB_2_24K = 0x00000040,
-    IS_IMAGE_SIGN_UINS_5 = 0x00000080,
-    
-    IS_IMAGE_SIGN_NUM_BITS_USED = 8,
-
-    IS_IMAGE_SIGN_APP = IS_IMAGE_SIGN_UINS_3_16K | IS_IMAGE_SIGN_UINS_3_24K | IS_IMAGE_SIGN_EVB_2_16K | IS_IMAGE_SIGN_EVB_2_24K | IS_IMAGE_SIGN_UINS_5 | IS_IMAGE_SIGN_ISB_SAMx70_16K | IS_IMAGE_SIGN_ISB_SAMx70_24K | IS_IMAGE_SIGN_ISB_STM32L4,
-    IS_IMAGE_SIGN_ISB = IS_IMAGE_SIGN_UINS_3_16K | IS_IMAGE_SIGN_UINS_3_24K | IS_IMAGE_SIGN_EVB_2_16K | IS_IMAGE_SIGN_EVB_2_24K | IS_IMAGE_SIGN_UINS_5 | IS_IMAGE_SIGN_ISB_SAMx70_16K | IS_IMAGE_SIGN_ISB_SAMx70_24K | IS_IMAGE_SIGN_ISB_STM32L4,
-    IS_IMAGE_SIGN_SAMBA = IS_IMAGE_SIGN_ISB_SAMx70_16K | IS_IMAGE_SIGN_ISB_SAMx70_24K,
-    IS_IMAGE_SIGN_DFU = IS_IMAGE_SIGN_ISB_STM32L4,
-
-    IS_IMAGE_SIGN_EVB = IS_IMAGE_SIGN_EVB_2_16K | IS_IMAGE_SIGN_EVB_2_24K,
+    // Inertial sense application modes
+    IS_IMAGE_SIGN_IMX5p0 = 0x00000001,
+    IS_IMAGE_SIGN_GPX1p0 = 0x00000002,
+    IS_IMAGE_SIGN_CXD5610 = 0x00000003,
 
     IS_IMAGE_SIGN_NONE = 0,
     IS_IMAGE_SIGN_ERROR = 0x80000000,
 } eImageSignature;
 
-typedef struct 
-{
-    std::string path;
-} firmware_t;
+typedef enum {
+    IS_DEVICE_MODE_GPX1p0_APP       = 0x00000001U,   // GPX-1 application mode
+    IS_DEVICE_MODE_IMX5p0_APP       = 0x00000002U,   // IMX-5 application mode
+    IS_DEVICE_MODE_STM32L4_DFU      = 0x00000004U,   // STM32L4 DFU (USB) bootloader
+    IS_DEVICE_MODE_STM32U5_DFU      = 0x00000008U,   // STM32U5 DFU (USB) bootloader
+    IS_DEVICE_MODE_STM32L4_USART    = 0x00000010U,   // STM32L4 USART bootloader
+    IS_DEVICE_MODE_STM32U5_USART    = 0x00000020U,   // STM32U5 USART bootloader
+    IS_DEVICE_MODE_SONY_CXD5610     = 0x00000040U,   // Sony CXD5610 GNSS LSI bootloader
 
-typedef struct 
-{
-    firmware_t fw_IMX_5;
-    firmware_t bl_IMX_5;
-    firmware_t fw_uINS_3;
-    firmware_t bl_uINS_3;
-    firmware_t fw_EVB_2;
-    firmware_t bl_EVB_2;
-} firmwares_t;
+    IS_DEVICE_MODE_NONE             = 0U,
+    IS_DEVICE_MODE_ERROR            = 0x80000000U,
+} eDeviceMode;
 
 typedef is_operation_result (*pfnBootloadProgress)(void* obj, float percent);
 typedef void (*pfnBootloadStatus)(void* obj, const char* infoString, eLogLevel level);
@@ -113,6 +74,7 @@ class cISBootloaderBase
 {
 public:
     cISBootloaderBase(
+        std::string filename,
         pfnBootloadProgress upload_cb,
         pfnBootloadProgress verify_cb,
         pfnBootloadStatus info_cb
@@ -121,6 +83,7 @@ public:
         m_verify_callback{verify_cb}, 
         m_info_callback{info_cb}
     {
+        m_filename = filename;
         m_success = false;
         m_update_progress = 0.0;
         m_verify_progress = 0.0;
@@ -137,35 +100,28 @@ public:
 
     virtual ~cISBootloaderBase() {};
 
-    static eImageSignature get_image_signature(std::string filename, uint8_t* major = NULL, char* minor = NULL);
+    static eImageSignature get_image_signature(std::string filename);
 
     virtual is_operation_result match_test(void* param) = 0;
 
-    virtual eImageSignature check_is_compatible() = 0;
+    virtual uint8_t check_is_compatible(uint32_t imgSign) = 0;
 
     /**
      * @brief Reboots into the same mode, giving the bootloader a fresh start
      */
     virtual is_operation_result reboot() = 0;
-    virtual is_operation_result reboot_force() { return IS_OP_OK; }
     
     /**
-     * @brief Reboots into the level above, if available:
-     *  - ISB to App
-     *  - SAM-BA to ISB
-     *  - DFU to ISB
-     *  Make sure to tall the destructor after a successful call to this function
+     * @brief Reboots into the level above, if available.
+     *  Make sure to call the destructor after a successful call to this function
      */
     virtual is_operation_result reboot_up() = 0;
 
     /**
-     * @brief Reboots into the level below, if available:
-     *  - App to ISB
-     *  - ISB to DFU
-     *  - ISB to SAM-BA
+     * @brief Reboots into the next level down, if available.
      *  Make sure to call the destructor after a successful call to this function
      */
-    virtual is_operation_result reboot_down(uint8_t major = 0, char minor = 0, bool force = false) = 0;
+    virtual is_operation_result reboot_down() { return IS_OP_OK; };
 
     /**
      * @brief Get the serial number from the device, and fill out m_ctx with other info
@@ -177,21 +133,21 @@ public:
      * 
      * @param image path to the image
      */
-    virtual is_operation_result download_image(std::string image) = 0;
+    virtual is_operation_result download_image(void) = 0;
 
     /**
      * @brief Read an image from the device
      * 
      * @param image path to the image
      */
-    virtual is_operation_result upload_image(std::string image) = 0;
+    virtual is_operation_result upload_image(void) = 0;
     
     /**
      * @brief Verify an image against the device
      * 
      * @param image path to the image
      */
-    virtual is_operation_result verify_image(std::string image) = 0;
+    virtual is_operation_result verify_image(void) = 0;
 
     virtual bool is_serial_device() { return true; }
     
@@ -208,7 +164,6 @@ public:
 
     void* m_thread;
     bool m_finished_flash;
-    int m_device_type;
     bool m_use_progress;
     int m_start_time_ms;
 
@@ -217,35 +172,9 @@ public:
     int m_baud;
 
     uint32_t m_sn;                      // Inertial Sense serial number, i.e. SN60000
-    uint8_t m_isb_major;                  // ISB Major revision on device
-    char m_isb_minor;                     // ISB Minor revision on device
-    bool isb_mightUpdate;               // true if device will be updated if bootloader continues
 
     static is_operation_result mode_device_app(
-        firmwares_t filenames,
-        serial_port_t* handle,
-        pfnBootloadStatus statusfn,
-        pfnBootloadProgress updateProgress,
-        pfnBootloadProgress verifyProgress,
-        std::vector<cISBootloaderBase*>& contexts,
-        std::mutex* addMutex,
-        cISBootloaderBase** new_context
-    );
-
-    static is_operation_result get_device_isb_version(
-        firmwares_t filenames,
-        serial_port_t* handle,
-        pfnBootloadStatus statusfn,
-        pfnBootloadProgress updateProgress,
-        pfnBootloadProgress verifyProgress,
-        std::vector<cISBootloaderBase*>& contexts,
-        std::mutex* addMutex,
-        cISBootloaderBase** new_context
-    );
-
-    static is_operation_result mode_device_isb(
-        firmwares_t filenames,
-        bool force,
+        std::vector<std::string> filenames,
         serial_port_t* handle,
         pfnBootloadStatus statusfn,
         pfnBootloadProgress updateProgress,
@@ -256,17 +185,19 @@ public:
     );
 
     static is_operation_result update_device(
-        firmwares_t filenames,
+        std::vector<std::string> filenames,
         serial_port_t* handle,
         pfnBootloadStatus statusfn,
         pfnBootloadProgress updateprogress,
         pfnBootloadProgress verifyProgress,
         std::vector<cISBootloaderBase*>& contexts,
         std::mutex* addMutex,
-        cISBootloaderBase** new_context
+        cISBootloaderBase** new_context,
+        uint32_t baud = BAUDRATE_921600
     );
+
     static is_operation_result update_device(
-        firmwares_t filenames,
+        std::vector<std::string> filenames,
         libusb_device_handle* handle,
         pfnBootloadStatus statusfn,
         pfnBootloadProgress updateprogress,
@@ -277,6 +208,7 @@ public:
     );
 
     std::string m_filename;
+    uint32_t m_image_signature;
     bool m_isISB;
 
 protected:
@@ -288,18 +220,15 @@ protected:
     struct
     {
         uint8_t uins_version[4];
-        uint8_t evb_version[4];
-
-        char enable_command[5];         // "EBLE" (EVB) or "BLEN" (uINS) 
+        char enable_command[5];         // "BLEN" for IMX-5
     } m_app;
 
     /**
      * @brief Get the file extension from a file name
      */
     static const char* get_file_ext(const char* filename);
-    
-    static eImageSignature get_hex_image_signature(std::string image, uint8_t* major = NULL, char* minor = NULL);
-    static eImageSignature get_bin_image_signature(std::string image, uint8_t* major = NULL, char* minor = NULL);
+    static eImageSignature get_hex_image_signature(std::string filename);
+    static eImageSignature get_folder_image_signature(std::string filename);
 };
 
 }

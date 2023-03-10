@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -18,7 +18,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <cstdarg>
 #include <string>
 
-#define LOG_DEBUG_GEN			(PLATFORM_IS_EMBEDDED==0)		
 #define LOG_DEBUG_FILE_WRITE	0		// Enable file debug printout
 #define LOG_DEBUG_FILE_READ		0		// 
 #define LOG_DEBUG_CHUNK_WRITE	0		// Enable chunk debug printout

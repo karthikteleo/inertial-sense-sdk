@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -39,6 +39,7 @@ cDeviceLog::cDeviceLog()
     m_fileCount = 0;
     memset(&m_devInfo, 0, sizeof(dev_info_t));
 	m_altClampToGround = true;
+	m_enableGpsLogging = true;
 	m_showTracks = true;
 	m_showPointTimestamps = true;
 	m_pointUpdatePeriodSec = 1.0f;

@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -74,7 +74,7 @@ void convertIns4ToIns1(ins_4_t *ins4, ins_1_t *result, double *refLla)
     result->hdwStatus	= ins4->hdwStatus;
 
     quatConjRot(result->uvw, ins4->qe2b, ins4->ve);
-    ecef2lla(ins4->ecef, llaRad, ECEF2LLA_METHOD);
+    ecef2lla(ins4->ecef, llaRad);
     qe2b2EulerNedLLA(result->theta, ins4->qe2b, llaRad);
     lla_Rad2Deg_d(result->lla, llaRad);
     if (refLla)

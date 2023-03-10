@@ -1,7 +1,7 @@
 /*
 MIT LICENSE
 
-Copyright (c) 2014-2022 Inertial Sense, Inc. - http://inertialsense.com
+Copyright (c) 2014-2023 Inertial Sense, Inc. - http://inertialsense.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
 
@@ -295,7 +295,21 @@ static int serialPortOpenPlatform(serial_port_t* serialPort, const char* port, i
         serialParams.BaudRate = baudRate;
         serialParams.ByteSize = DATABITS_8;
         serialParams.StopBits = ONESTOPBIT;
-        serialParams.Parity = NOPARITY;
+
+        switch(serialPort->options & OPT_PARITY_MASK)
+        {
+        case OPT_PARITY_EVEN:
+            serialParams.Parity = EVENPARITY;
+            break;
+        case OPT_PARITY_ODD:    
+            serialParams.Parity = ODDPARITY;
+            break;
+        case OPT_PARITY_NONE:
+        default:
+            serialParams.Parity = NOPARITY;
+            break;
+        }
+
         serialParams.fBinary = 1;
         serialParams.fInX = 0;
         serialParams.fOutX = 0;
@@ -416,7 +430,7 @@ static int serialPortFlushPlatform(serial_port_t* serialPort)
 
 #if PLATFORM_IS_WINDOWS
 
-    if (!PurgeComm(handle->platformHandle, PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXABORT | PURGE_TXCLEAR))
+    if(!FlushFileBuffers(handle->platformHandle))
     {
         return 0;
     }
@@ -632,24 +646,21 @@ static int serialPortWritePlatform(serial_port_t* serialPort, const unsigned cha
 
     struct stat sb;
     if(stat(serialPort->port, &sb) != 0)
-    {
-        error_message("error: serial port not open\r\n\r\n");
+    {   // Serial port not open
         return 0;
     }
     
     int count = write(handle->fd, buffer, writeCount);
     if(count != writeCount) 
-    {
-        error_message("write error %d\r\n\r\n", errno);
+    {   // Write error
         return 0;
     }
 
     int error = 0;
-    // if(handle->blocking) error = tcdrain(handle->fd);
+    if(handle->blocking) error = tcdrain(handle->fd);
 
     if (error != 0)
-    {
-        error_message("error %d from tcdrain\r\n\r\n", errno);
+    {   // Drain error
         return 0;
     }
 
