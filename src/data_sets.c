@@ -819,6 +819,8 @@ double gpsToJulian(int32_t gpsWeek, int32_t gpsMilliseconds, int32_t leapSeconds
 	return (2444244.500000) + gpsDays; // 2444244.500000 Julian date for Jan 6, 1980 midnight - start of gps time
 }
 
+#ifndef GPX_1
+
 static void appendGPSTimeOfLastFix(const gps_pos_t* gps, char** buffer, int* bufferLength)
 {
     unsigned int millisecondsToday = gps->timeOfWeekMs % 86400000;
@@ -848,8 +850,6 @@ static void appendGPSCoord(const gps_pos_t* gps, char** buffer, int* bufferLengt
     *bufferLength -= written;
     *buffer += written;
 }
-
-#ifndef GPX_1
 
 /* ubx gnss indicator (ref [2] 25) -------------------------------------------*/
 int ubxSys(int gnssID)

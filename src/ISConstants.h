@@ -23,10 +23,10 @@ extern "C" {
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#include <assert.h>
 #include <inttypes.h>
 #include <time.h>
 #include <limits.h>
+#include <assert.h>
 
 #define ECEF2LLA_METHOD 5  // Method to compute LLA from ECEF position (0 through 5)
 
@@ -143,7 +143,10 @@ extern void vPortFree(void* pv);
 
 #endif 
 
-#if PLATFORM_IS_EMBEDDED
+#if __ZEPHYR__
+#include <zephyr/sys/printk.h>
+#define SNPRINTF snprintk
+#elif PLATFORM_IS_EMBEDDED
 #include "printf.h"		// Use embedded-safe SNPRINTF
 #define SNPRINTF snprintf_
 #else
@@ -412,7 +415,7 @@ extern void vPortFree(void* pv);
 #define PRE_PROC_COMBINE(X, Y) X##Y
 #ifndef STATIC_ASSERT
 // #define STATIC_ASSERT_MSG(exp, msg) typedef char PRE_PROC_COMBINE(msg, __LINE__)[(exp) ? 1 : -1]
-#define STATIC_ASSERT(exp) static_assert(exp, #exp)
+#define STATIC_ASSERT _Static_assert
 #endif
 #ifndef OVERRIDE
 #define OVERRIDE
