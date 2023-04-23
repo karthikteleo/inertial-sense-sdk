@@ -38,3 +38,4 @@ if(NOT IGNORE_EXAMPLE_PROJECTS)
 	add_subdirectory(ExampleProjects)
 
 endif()
+
