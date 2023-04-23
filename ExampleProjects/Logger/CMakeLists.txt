@@ -1,83 +1,19 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.13)
 
+# Required: set the project
 project(ISLoggerExample)
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+# Required: set PROJECT_NAME to the same name as project in case of a multi-file build
+set(PROJECT_NAME "ISLoggerExample")
 
+# Required: set the PROJECT_DIR to let the common cmake file know where this project lives
+set(PROJECT_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
-if(BUILD_INERTIAL_SENSE_SDK)	# Build w/ SDK
+# Required: set SOURCES_PROJECT to the code in this project, the files must go on their own lines
+set(SOURCES_PROJECT	"${PROJECT_DIR}/ISLoggerExample.cpp")
 
-add_executable(ISLoggerExample ISLoggerExample.cpp)
-target_link_libraries(ISLoggerExample InertialSense)
+# Optional: add any libraries this project needs
+#set(PROJECT_LIBS "")
 
-else()	# Build only this project
-
-add_executable(ISLoggerExample
-    ISLoggerExample.cpp
-	../../src/com_manager.c
-	../../src/convert_ins.cpp
-	../../src/data_sets.c
-	../../src/DataChunk.cpp
-	../../src/DataChunkSorted.cpp
-	../../src/DataCSV.cpp
-	../../src/DataJSON.cpp
-	../../src/DataKML.cpp
-	../../src/DeviceLog.cpp
-	../../src/DeviceLogCSV.cpp
-	../../src/DeviceLogJSON.cpp
-	../../src/DeviceLogKML.cpp
-	../../src/DeviceLogSerial.cpp
-	../../src/DeviceLogSorted.cpp
-	../../src/ihex.c
-	../../src/InertialSense.cpp
-	../../src/ISBootloaderBase.cpp
-	../../src/ISBootloaderThread.cpp
-	../../src/ISBootloaderAPP.cpp
-	../../src/ISBootloaderISB.cpp
-	../../src/ISBootloaderDFU.cpp
-	../../src/ISBootloaderSAMBA.cpp
-	../../hw-libs/bootloader/bootloaderShared.c
-	../../src/ISClient.cpp
-	../../src/ISComm.c
-	../../src/ISDataMappings.cpp
-	../../src/ISDisplay.cpp
-	../../src/ISEarth.c
-	../../src/ISFileManager.cpp
-	../../src/ISLogFile.cpp
-	../../src/ISLogger.cpp
-	../../src/ISLogStats.cpp
-	../../src/ISMatrix.c
-	../../src/ISPose.c
-	../../src/ISSerialPort.cpp
-	../../src/ISStream.cpp
-	../../src/ISTcpClient.cpp
-	../../src/ISTcpServer.cpp
-	../../src/ISUtilities.cpp
-	../../src/message_stats.cpp
-	../../src/protocol_nmea.cpp
-	../../src/linked_list.c
-	../../src/serialPort.c
-	../../src/serialPortPlatform.c
-	../../src/time_conversion.c
-	../../src/tinystr.cpp
-	../../src/tinyxml.cpp
-	../../src/tinyxmlerror.cpp
-	../../src/tinyxmlparser.cpp
-)
-
-find_library(LIBUSB_LIBRARY
-	NAMES usb-1.0
-	PATH_SUFFIXES "lib" "lib32" "lib64"
-)
-
-target_include_directories(ISLoggerExample PUBLIC
-	../../src
-	../../src/libusb/libusb
-	../../src/libusb/msvc
-)
-
-target_link_libraries(ISLoggerExample pthread ${LIBUSB_LIBRARY} m)
-
-endif()
-
+# Everything is setup, use common template to build
+include(../../CMakeCommon.txt)

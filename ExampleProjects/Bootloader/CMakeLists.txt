@@ -1,53 +1,16 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.13)
 
+# Required: set the project
 project(ISBootloaderExample)
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+# Required: set PROJECT_NAME to the same name as project in case of a multi-file build
+set(PROJECT_NAME "ISBootloaderExample")
 
+# Required: set the PROJECT_DIR to let the common cmake file know where this project lives
+set(PROJECT_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
-if(BUILD_INERTIAL_SENSE_SDK)	# Build w/ SDK
+# Required: set SOURCES_PROJECT to the code in this project, the files must go on their own lines
+set(SOURCES_PROJECT	"${PROJECT_DIR}/ISBootloaderExample.cpp")
 
-add_executable(ISBootloaderExample ISBootloaderExample.cpp)
-target_link_libraries(ISBootloaderExample InertialSense)
-
-else()	# Build only this project
-
-add_executable(ISBootloaderExample
-	ISBootloaderExample.cpp
-	../../src/data_sets.c
-	
-	../../hw-libs/bootloader/bootloaderShared.c
-	../../src/ihex.c
-	../../src/ISComm.c
-	../../src/serialPort.c
-	../../src/serialPortPlatform.c
-	../../src/ISSerialPort.cpp
-	../../src/ISBootloaderBase.cpp
-	../../src/ISBootloaderThread.cpp
-	../../src/ISBootloaderAPP.cpp
-	../../src/ISBootloaderISB.cpp
-	../../src/ISBootloaderDFU.cpp
-	../../src/ISBootloaderSAMBA.cpp
-	../../src/ISUtilities.cpp
-	../../src/ISStream.cpp
-	../../src/ISFileManager.cpp
-)
-target_link_libraries(ISBootloaderExample m)
-
-find_library(LIBUSB_LIBRARY
-	NAMES usb-1.0
-	PATH_SUFFIXES "lib" "lib32" "lib64"
-)
-
-target_include_directories(ISBootloaderExample PUBLIC
-	../../src
-	../../src/libusb/libusb
-	../../src/libusb/msvc
-)
-
-target_link_libraries(ISBootloaderExample pthread ${LIBUSB_LIBRARY})
-
-endif()
-
+include(../../CMakeCommon.txt)
 
