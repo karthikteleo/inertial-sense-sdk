@@ -20,7 +20,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "ISPose.h"
 #include "ISEarth.h"
 
-#if PLATFORM_IS_EMBEDDED
+#if PLATFORM_IS_EMBEDDED && !defined(__ZEPHYR__)
 
 #include "d_time.h"
  
