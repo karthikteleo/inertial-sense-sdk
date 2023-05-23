@@ -3239,7 +3239,7 @@ typedef struct
     double f2;
 
     /** Group delay parameters GPS/QZS: tgd[0] = TGD (IRN-IS-200H p.103). Galilleo: tgd[0] = BGD E5a/E1, tgd[1] = BGD E5b/E1. Beidou: tgd[0] = BGD1, tgd[1] = BGD2 */
-    double tgd[4];
+    double tgd[6];
 
     /** Adot for CNAV, not used */
     double Adot;
