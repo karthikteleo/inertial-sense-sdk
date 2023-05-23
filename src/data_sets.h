@@ -2828,13 +2828,9 @@ PUSH_PACK_8
 #ifndef GPX_1
 
 /** time struct */
-typedef struct
-{
-    /** time (s) expressed by standard time_t */
-    int64_t time;
-
-    /** fraction of second under 1 s */
-    double sec;         
+typedef struct {
+    time_t time;        /* time (s) expressed by standard time_t */
+    double sec;         /* fraction of second under 1 s */
 } gtime_t;
 
 typedef struct PACKED
@@ -2936,6 +2932,128 @@ PUSH_PACK_1
 
 #ifndef GPX_1
 
+#ifndef __RTKLIB_EMBEDDED_DEFINES_H_
+
+#define MINPRNGPS   1                   /* min satellite PRN number of GPS */
+#define MAXPRNGPS   32                  /* max satellite PRN number of GPS */
+#define NSATGPS     (MAXPRNGPS-MINPRNGPS+1) /* number of GPS satellites */
+#define NSYSGPS     1
+
+#define ENAGLO
+#ifdef ENAGLO
+#define MINPRNGLO   1                   /* min satellite slot number of GLONASS */
+#define MAXPRNGLO   27                  /* max satellite slot number of GLONASS */
+#define NSATGLO     (MAXPRNGLO-MINPRNGLO+1) /* number of GLONASS satellites */
+#define NSYSGLO     1
+#else
+#define MINPRNGLO   0
+#define MAXPRNGLO   0
+#define NSATGLO     0
+#define NSYSGLO     0
+#endif
+
+#define ENAGAL
+#ifdef ENAGAL
+#define MINPRNGAL   1                   /* min satellite PRN number of Galileo */
+#define MAXPRNGAL   36                  /* max satellite PRN number of Galileo */
+#define NSATGAL    (MAXPRNGAL-MINPRNGAL+1) /* number of Galileo satellites */
+#define NSYSGAL     1
+#else
+#define MINPRNGAL   0
+#define MAXPRNGAL   0
+#define NSATGAL     0
+#define NSYSGAL     0
+#endif
+
+//#define ENAQZS
+#ifdef ENAQZS
+#define MINPRNQZS   193                 /* min satellite PRN number of QZSS */
+#define MAXPRNQZS   202                 /* max satellite PRN number of QZSS */
+#define MINPRNQZS_S 183                 /* min satellite PRN number of QZSS L1S */
+#define MAXPRNQZS_S 191                 /* max satellite PRN number of QZSS L1S */
+#define NSATQZS     (MAXPRNQZS-MINPRNQZS+1) /* number of QZSS satellites */
+#define NSYSQZS     1
+#else
+#define MINPRNQZS   0
+#define MAXPRNQZS   0
+#define MINPRNQZS_S 0
+#define MAXPRNQZS_S 0
+#define NSATQZS     0
+#define NSYSQZS     0
+#endif
+
+#ifdef ENACMP
+#define MINPRNCMP   1                   /* min satellite sat number of BeiDou */
+#define MAXPRNCMP   46                  /* max satellite sat number of BeiDou */
+#define NSATCMP     (MAXPRNCMP-MINPRNCMP+1) /* number of BeiDou satellites */
+#define NSYSCMP     1
+#else
+#define MINPRNCMP   0
+#define MAXPRNCMP   0
+#define NSATCMP     0
+#define NSYSCMP     0
+#endif
+
+#define ENASBS
+
+#define MAXSUBFRMLEN 152
+#define MAXRAWLEN   16384  /* max length of receiver raw message */
+
+#define NFREQ       3      /* number of carrier frequencies */
+
+#ifdef ENAGLO
+#define NFREQGLO 2   /* number of carrier frequencies of GLONASS */
+#else
+#define NFREQGLO 0
+#endif
+
+#ifdef ENAGAL
+#define NFREQGAL 1
+#else
+#define NFREQGAL 0
+#endif
+
+#define NEXOBS      0           /* number of extended obs codes */
+#define MAXOBS      96          /* max number of obs in an epoch */
+#define HALF_MAXOBS (MAXOBS/2)
+#define NUMSATSOL 50
+#define MAXERRMSG   4096                /* max length of error/warning message */
+#define MAXANT      64                  /* max length of station name/antenna type */
+
+
+#ifdef ENASBS
+// sbas waas only satellites
+#define MINPRNSBS   120                 /* min satellite PRN number of SBAS */
+#define MAXPRNSBS   158                 /* max satellite PRN number of SBAS */
+#define NSATSBS     (MAXPRNSBS-MINPRNSBS+1) /* number of SBAS satellites */
+#define SBAS_EPHEMERIS_ARRAY_SIZE NSATSBS
+#else
+#define SBAS_EPHEMERIS_ARRAY_SIZE 0
+#endif
+
+#define NSATIRN     0
+#define NSATLEO     0
+
+#define MAXSAT      (NSATGPS+NSATGLO+NSATGAL+NSATQZS+NSATCMP+NSATIRN+NSATSBS+NSATLEO)
+
+#endif
+
+typedef struct {        /* SNR mask type */
+    int ena[2];         /* enable flag {rover,base} */
+    double mask[NFREQ][9]; /* mask (dBHz) at 5,10,...85 deg */
+} snrmask_t;
+
+typedef struct {        /* antenna parameter type */
+    int sat;            /* satellite number (0:receiver) */
+    char type[MAXANT];  /* antenna type */
+    char code[MAXANT];  /* serial number or satellite code */
+    gtime_t ts, te;      /* valid time start and end */
+    double off[NFREQ][3]; /* phase center offset e/n/u or x/y/z (m) */
+    double var[NFREQ][19]; /* phase center variation (m) */
+    /* el=90,85,...,0 or nadir=0,1,2,3,... (deg) */
+} pcv_t;
+
+
 /** (DID_GPS_RTK_OPT) RTK processing options */
 typedef struct
 {
@@ -2954,8 +3072,11 @@ typedef struct
     /** elevation mask angle (rad) */
     double elmin;
 
-    /** Min snr to consider satellite for rtk */
-    int32_t snrmin;
+    /* SNR mask */
+    snrmask_t snrmask;
+
+    /* satellite ephemeris/clock (EPHOPT_???) */
+    int sateph;
 
     /** AR mode (0:off,1:continuous,2:instantaneous,3:fix and hold,4:ppp-ar) */
     int32_t modear;
@@ -2965,9 +3086,6 @@ typedef struct
 
     /** GPS AR mode (0:off,1:on) */
     int32_t gpsmodear;
-
-    /** SBAS AR mode (0:off,1:on) */
-    int32_t sbsmodear;
 
     /** BeiDou AR mode (0:off,1:on) */
     int32_t bdsmodear;
@@ -3002,26 +3120,46 @@ typedef struct
     /** max iteration to resolve ambiguity */
     int32_t armaxiter;
 
+    /* ionosphere option (IONOOPT_???) */
+    int ionoopt;
+
+    /* troposphere option (TROPOPT_???) */
+    int tropopt;
+
     /** dynamics model (0:none,1:velociy,2:accel) */
     int32_t dynamics;
+
+    /* earth tide correction (0:off,1:solid,2:solid+otl+pole) */
+    int tidecorr;
 
     /** number of filter iteration */
     int32_t niter;
 
+    /* code smoothing window size (0:none) */
+    int codesmooth;
+
     /** interpolate reference obs (for post mission) */
     int32_t intpref;
+
+    /* SBAS correction options */
+    int sbascorr;
+
+    /* SBAS satellite selection (0:all) */
+    int sbassatsel;
 
     /** rover position for fixed mode */
     int32_t rovpos;
 
     /** base position for relative mode */
+    /* (0:pos in prcopt,  1:average of single pos, */
+    /*  2:read from file, 3:rinex header, 4:rtcm pos) */
     int32_t refpos;
 
     /** code/phase error ratio */
-    double eratio[1];
+    double eratio[NFREQ];
 
     /** measurement error factor */
-    double err[5];
+    double err[8];
 
     /** initial-state std [0]bias,[1]iono [2]trop */
     double std[3];
@@ -3044,6 +3182,9 @@ typedef struct
     /** slip threshold of geometry-free phase (m) */
     double thresslip;
 
+    /* slip threshold of doppler (m) */
+    double thresdop;
+
     /** variance for fix-and-hold pseudo measurements (cycle^2) */
     double varholdamb;
 
@@ -3053,19 +3194,21 @@ typedef struct
     /** max difference of time (sec) */
     double maxtdiff;
 
+    /* reject threshold of innovation for code and phase (m) */
+    double maxinno[2];
+
+    /** baseline length constraint {const,sigma before fix, sigma after fix} (m) */
+    double baseline[3];
+
     /** reset sat biases after this long trying to get fix if not acquired */
     int fix_reset_base_msgs;
 
     /** reject threshold of NIS */
-    double maxinnocode;
-    double maxinnophase;
     double maxnis;
 
     /** reject threshold of gdop */
     double maxgdop;
 
-    /** baseline length constraint {const,sigma before fix, sigma after fix} (m) */
-    double baseline[3];
     double max_baseline_error;
     double reset_baseline_error;
 
@@ -3078,16 +3221,51 @@ typedef struct
     /** base position for relative mode {x,y,z} (ecef) (m) */
     double rb[3];
 
+    /* antenna types {rover,base} */
+    char anttype[2][MAXANT];
+
+    /* antenna delta {{rov_e,rov_n,rov_u},{ref_e,ref_n,ref_u}} */
+    double antdel[2][3];
+
+    /* receiver antenna parameters {rov,base} */
+    pcv_t pcvr[2];
+
+    /* excluded satellites (1:excluded,2:included) */
+    uint8_t exsats[MAXSAT];
+
     /** max averaging epochs */
     int32_t maxaveep;
 
+    /* initialize by restart */
+    int  initrst;
+
     /** output single by dgps/float/fix/ppp outage */
     int32_t outsingle;
+
+    /* rinex options {rover,base} */
+    char rnxopt[2][256];
+
+    /* positioning options */
+    int  posopt[6];
+
+    /* solution sync mode (0:off,1:on) */
+    int  syncsol;
+
+    /* ocean tide loading parameters {rov,base} */
+    double odisp[2][6 * 11];
+
+    /* disable L2-AR */
+    int  freqopt;
+
+    /* ppp option */
+    char pppopt[256];
 } prcopt_t;
+
 typedef prcopt_t gps_rtk_opt_t;
 
+
 /** Raw satellite observation data */
-typedef struct PACKED
+typedef struct // PACKED
 {
     /** Receiver local time approximately aligned to the GPS time system (GPST) */
     gtime_t time;
@@ -3099,31 +3277,40 @@ typedef struct PACKED
     uint8_t rcv;
 
     /** Cno, carrier-to-noise density ratio (signal strength) (0.25 dB-Hz) */
-    uint8_t SNR[1];
+    uint16_t SNR[NFREQ + NEXOBS];
 
     /** Loss of Lock Indicator. Set to non-zero values only when carrier-phase is valid (L > 0).  bit1 = loss-of-lock, bit2 = half-cycle-invalid */
-    uint8_t LLI[1];
+    uint8_t LLI[NFREQ + NEXOBS];
 
     /** Code indicator: CODE_L1C (1) = L1C/A,G1C/A,E1C (GPS,GLO,GAL,QZS,SBS), CODE_L1X (12) = E1B+C,L1C(D+P) (GAL,QZS), CODE_L1I (47) = B1I (BeiDou) */
-    uint8_t code[1];
-
-    /** Estimated carrier phase measurement standard deviation (0.004 cycles), zero means invalid */
-    uint8_t qualL[1];
-
-    /** Estimated pseudorange measurement standard deviation (0.01 m), zero means invalid */
-    uint8_t qualP[1];
-
-    /** reserved, for alignment */
-    uint8_t reserved;
+    uint8_t code[NFREQ + NEXOBS];
 
     /** Observation data carrier-phase (cycle). The carrier phase initial ambiguity is initialized using an approximate value to make the magnitude of the phase close to the pseudorange measurement. Clock resets are applied to both phase and code measurements in accordance with the RINEX specification. */
-    double L[1];
+    double L[NFREQ + NEXOBS];
 
     /** Observation data pseudorange (m). GLONASS inter frequency channel delays are compensated with an internal calibration table */
-    double P[1]; 
+    double P[NFREQ + NEXOBS];
 
     /** Observation data Doppler measurement (positive sign for approaching satellites) (Hz) */
-    float D[1];
+    float D[NFREQ + NEXOBS];
+
+    /* time is valid (Valid GNSS fix) for time mark */
+    int timevalid;
+
+    /* time of event (GPST) */
+    gtime_t eventime;
+
+    /* stdev of carrier phase (0.004 cycles)  */
+    uint8_t Lstd[NFREQ + NEXOBS];
+
+    /* stdev of pseudorange (0.01*2^(n+5) meters) */
+    uint8_t Pstd[NFREQ + NEXOBS];
+
+    /* GLONASS frequency channel (0-13) */
+    uint8_t freq;
+
+    /** reserved, for alignment */
+    //uint8_t reserved;  ?????
 } obsd_t;
 
 #define GPS_RAW_MESSAGE_BUF_SIZE    1000
@@ -3137,6 +3324,15 @@ typedef struct
 
     /** number of observation slots allocated */
     uint32_t nmax;
+
+    /* epoch flag (0:ok,1:power failure,>1:event flag) */
+    int flag;
+
+    /* count of rcv event */
+    int rcvcount;
+
+    /* time mark count */
+    int tmcount;
 
     /** observation data buffer */
     obsd_t* data;
@@ -3301,51 +3497,56 @@ typedef struct
     int32_t week;
     
     /** reception time - tow */
-    int32_t tow;
+    int tow;
 
     /** SBAS satellite PRN number */
     int32_t prn;
+
+    /** SBAS satellite receiver number */
+    int32_t rcv;
 
     /** SBAS message (226bit) padded by 0 */
     uint8_t msg[29];
 
     /** reserved for alighment */
-    uint8_t reserved[3];
+    //uint8_t reserved[3];
 } sbsmsg_t;
 
 /** station parameter type */
 typedef struct
 {
-    /** antenna delta type (0:enu,1:xyz) */
-    int32_t deltype;
-    
-    /** station position (ecef) (m) */
-    double pos[3];
-
-    /** antenna position delta (e/n/u or x/y/z) (m) */
-    double del[3];
-
-    /** antenna height (m) */
-    double hgt;
-    
-    /** station id */
-    int32_t stationId;
+    char name[MAXANT]; /* marker name */
+    char marker[MAXANT]; /* marker number */
+    char antdes[MAXANT]; /* antenna descriptor */
+    char antsno[MAXANT]; /* antenna serial number */
+    char rectype[MAXANT]; /* receiver type descriptor */
+    char recver[MAXANT]; /* receiver firmware version */
+    char recsno[MAXANT]; /* receiver serial number */
+    int antsetup;       /* antenna setup id */
+    int itrf;           /* ITRF realization year */
+    int deltype;        /* antenna delta type (0:enu,1:xyz) */
+    double pos[3];      /* station position (ecef) (m) */
+    double vel[3];      /* station velocity (ecef) (m/s) */
+    double del[3];      /* antenna position delta (e/n/u or x/y/z) (m) */
+    double hgt;         /* antenna height (m) */
+    int glo_cp_align;   /* GLONASS code-phase alignment (0:no,1:yes) */
+    double glo_cp_bias[4]; /* GLONASS code-phase biases {1C,1P,2C,2P} (m) */
 } sta_t;
 
 /** almanac type */
 typedef struct
 {
     /** satellite number */
-    int32_t sat;
+    int sat;
 
     /** sv health (0:ok) */
-    int32_t svh;
+    int svh;
 
     /** as and sv config */
-    int32_t svconf;
+    int svconf;
 
     /* GPS/QZS: gps week, GAL: galileo week */
-    int32_t week;
+    int week;
 
     /* Toa */
     gtime_t toa;        
@@ -4601,78 +4802,6 @@ Convert gnssID to ubx gnss indicator (ref [2] 25)
 */
 int ubxSys(int gnssID);
 
-#ifndef __RTKLIB_EMBEDDED_DEFINES_H_
-
-#undef ENAGLO
-#define ENAGLO
-
-#undef ENAGAL
-#define ENAGAL
-
-#undef ENAQZS
-//#define ENAQZS
-
-#undef ENASBS
-#define ENASBS
-
-#undef MAXSUBFRMLEN
-#define MAXSUBFRMLEN 152
-
-#undef MAXRAWLEN
-#define MAXRAWLEN 2048
-
-#undef NFREQ
-#define NFREQ 1
-
-#undef NFREQGLO
-#ifdef ENAGLO
-#define NFREQGLO 1
-#else
-#define NFREQGLO 0
-#endif
-
-#undef NFREQGAL
-#ifdef ENAGAL
-#define NFREQGAL 1
-#else
-#define NFREQGAL 0
-#endif
-
-#undef NEXOBS
-#define NEXOBS 0
-
-#undef MAXOBS
-#define MAXOBS 56               // Also defined inside rtklib_defines.h
-#define HALF_MAXOBS (MAXOBS/2)
-
-#undef NUMSATSOL
-#define NUMSATSOL 22
-
-#undef MAXERRMSG
-#define MAXERRMSG 0
-
-#ifdef ENASBS
-
-// sbas waas only satellites
-#undef MINPRNSBS
-#define MINPRNSBS 133                 /* min satellite PRN number of SBAS */
-
-#undef MAXPRNSBS
-#define MAXPRNSBS 138                 /* max satellite PRN number of SBAS */
-
-#undef NSATSBS
-#define NSATSBS (MAXPRNSBS - MINPRNSBS + 1) /* number of SBAS satellites */
-
-#define SBAS_EPHEMERIS_ARRAY_SIZE NSATSBS
-
-#else
-
-#define SBAS_EPHEMERIS_ARRAY_SIZE 0
-
-#endif
-
-
-#endif
 
 #ifndef RTKLIB_H
 
@@ -4694,7 +4823,7 @@ int ubxSys(int gnssID);
 #endif
 #ifdef ENAGAL
 #define MINPRNGAL   1                   /* min satellite PRN number of Galileo */
-#define MAXPRNGAL   30                  /* max satellite PRN number of Galileo */
+#define MAXPRNGAL   36                  /* max satellite PRN number of Galileo */
 #define NSATGAL    (MAXPRNGAL-MINPRNGAL+1) /* number of Galileo satellites */
 #define NSYSGAL     1
 #else
@@ -4705,9 +4834,9 @@ int ubxSys(int gnssID);
 #endif
 #ifdef ENAQZS
 #define MINPRNQZS   193                 /* min satellite PRN number of QZSS */
-#define MAXPRNQZS   199                 /* max satellite PRN number of QZSS */
-#define MINPRNQZS_S 183                 /* min satellite PRN number of QZSS SAIF */
-#define MAXPRNQZS_S 189                 /* max satellite PRN number of QZSS SAIF */
+#define MAXPRNQZS   202                 /* max satellite PRN number of QZSS */
+#define MINPRNQZS_S 183                 /* min satellite PRN number of QZSS L1S */
+#define MAXPRNQZS_S 191                 /* max satellite PRN number of QZSS L1S */
 #define NSATQZS     (MAXPRNQZS-MINPRNQZS+1) /* number of QZSS satellites */
 #define NSYSQZS     1
 #else
@@ -4720,7 +4849,7 @@ int ubxSys(int gnssID);
 #endif
 #ifdef ENACMP
 #define MINPRNCMP   1                   /* min satellite sat number of BeiDou */
-#define MAXPRNCMP   35                  /* max satellite sat number of BeiDou */
+#define MAXPRNCMP   46                  /* max satellite sat number of BeiDou */
 #define NSATCMP     (MAXPRNCMP-MINPRNCMP+1) /* number of BeiDou satellites */
 #define NSYSCMP     1
 #else
@@ -4731,7 +4860,7 @@ int ubxSys(int gnssID);
 #endif
 #ifdef ENAIRN
 #define MINPRNIRN   1                   /* min satellite sat number of IRNSS */
-#define MAXPRNIRN   7                   /* max satellite sat number of IRNSS */
+#define MAXPRNIRN   14                  /* max satellite sat number of IRNSS */
 #define NSATIRN     (MAXPRNIRN-MINPRNIRN+1) /* number of IRNSS satellites */
 #define NSYSIRN     1
 #else
@@ -4755,7 +4884,7 @@ int ubxSys(int gnssID);
 #ifndef NSATSBS
 #ifdef ENASBS
 #define MINPRNSBS   120                 /* min satellite PRN number of SBAS */
-#define MAXPRNSBS   142                 /* max satellite PRN number of SBAS */
+#define MAXPRNSBS   158                 /* max satellite PRN number of SBAS */
 #define NSATSBS     (MAXPRNSBS-MINPRNSBS+1) /* number of SBAS satellites */
 #else
 #define MINPRNSBS   0
