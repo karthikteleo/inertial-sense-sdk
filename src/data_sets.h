@@ -2996,7 +2996,7 @@ PUSH_PACK_1
 
 #define ENASBS
 
-#define MAXSUBFRMLEN 152
+#define MAXSUBFRMLEN 380
 #define MAXRAWLEN   16384  /* max length of receiver raw message */
 
 #define NFREQ       3      /* number of carrier frequencies */
