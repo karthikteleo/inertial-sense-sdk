@@ -3016,7 +3016,6 @@ PUSH_PACK_1
 #define NEXOBS      0           /* number of extended obs codes */
 #define MAXOBS      96          /* max number of obs in an epoch */
 #define HALF_MAXOBS (MAXOBS/2)
-#define NUMSATSOL 50
 #define MAXERRMSG   4096                /* max length of error/warning message */
 #define MAXANT      64                  /* max length of station name/antenna type */
 
@@ -3058,16 +3057,16 @@ typedef struct {        /* antenna parameter type */
 typedef struct
 {
     /** positioning mode (PMODE_???) */
-    int32_t mode;           
+    int mode;           
 
     /** solution type (0:forward,1:backward,2:combined) */
-    int32_t soltype;
+    int soltype;
 
     /** number of frequencies (1:L1,2:L1+L2,3:L1+L2+L5) */
-    int32_t nf;
+    int nf;
 
     /** navigation systems */
-    int32_t navsys;
+    int navsys;
 
     /** elevation mask angle (rad) */
     double elmin;
@@ -3079,46 +3078,40 @@ typedef struct
     int sateph;
 
     /** AR mode (0:off,1:continuous,2:instantaneous,3:fix and hold,4:ppp-ar) */
-    int32_t modear;
+    int modear;
 
     /** GLONASS AR mode (0:off,1:on,2:auto cal,3:ext cal) */
-    int32_t glomodear;
+    int glomodear;
 
     /** GPS AR mode (0:off,1:on) */
-    int32_t gpsmodear;
+    int gpsmodear;
 
     /** BeiDou AR mode (0:off,1:on) */
-    int32_t bdsmodear;
+    int bdsmodear;
 
     /** AR filtering to reject bad sats (0:off,1:on) */
-    int32_t arfilter;
+    int arfilter;
 
     /** obs outage count to reset bias */
-    int32_t maxout;
-
-    /** reject count to reset bias */
-    int32_t maxrej;
+    int maxout;
 
     /** min lock count to fix ambiguity */
-    int32_t minlock;
+    int minlock;
 
     /** min sats to fix integer ambiguities */
-    int32_t minfixsats;
+    int minfixsats;
 
     /** min sats to hold integer ambiguities */
-    int32_t minholdsats;
+    int minholdsats;
 
     /** min sats to drop sats in AR */
-    int32_t mindropsats;
-
-    /** use stdev estimates from receiver to adjust measurement variances */
-    int32_t rcvstds;
+    int mindropsats;
 
     /** min fix count to hold ambiguity */
-    int32_t minfix;
+    int minfix;
 
     /** max iteration to resolve ambiguity */
-    int32_t armaxiter;
+    int armaxiter;
 
     /* ionosphere option (IONOOPT_???) */
     int ionoopt;
@@ -3127,19 +3120,19 @@ typedef struct
     int tropopt;
 
     /** dynamics model (0:none,1:velociy,2:accel) */
-    int32_t dynamics;
+    int dynamics;
 
     /* earth tide correction (0:off,1:solid,2:solid+otl+pole) */
     int tidecorr;
 
     /** number of filter iteration */
-    int32_t niter;
+    int niter;
 
     /* code smoothing window size (0:none) */
     int codesmooth;
 
     /** interpolate reference obs (for post mission) */
-    int32_t intpref;
+    int intpref;
 
     /* SBAS correction options */
     int sbascorr;
@@ -3148,12 +3141,12 @@ typedef struct
     int sbassatsel;
 
     /** rover position for fixed mode */
-    int32_t rovpos;
+    int rovpos;
 
     /** base position for relative mode */
     /* (0:pos in prcopt,  1:average of single pos, */
     /*  2:read from file, 3:rinex header, 4:rtcm pos) */
-    int32_t refpos;
+    int refpos;
 
     /** code/phase error ratio */
     double eratio[NFREQ];
@@ -3198,22 +3191,7 @@ typedef struct
     double maxinno[2];
 
     /** baseline length constraint {const,sigma before fix, sigma after fix} (m) */
-    double baseline[3];
-
-    /** reset sat biases after this long trying to get fix if not acquired */
-    int fix_reset_base_msgs;
-
-    /** reject threshold of NIS */
-    double maxnis;
-
-    /** reject threshold of gdop */
-    double maxgdop;
-
-    double max_baseline_error;
-    double reset_baseline_error;
-
-    /** maximum error wrt ubx position (triggers reset if more than this far) (m) */
-    float max_ubx_error;
+    double baseline[2];
 
     /** rover position for fixed mode {x,y,z} (ecef) (m) */
     double ru[3];
@@ -3234,13 +3212,13 @@ typedef struct
     uint8_t exsats[MAXSAT];
 
     /** max averaging epochs */
-    int32_t maxaveep;
+    int maxaveep;
 
     /* initialize by restart */
     int  initrst;
 
     /** output single by dgps/float/fix/ppp outage */
-    int32_t outsingle;
+    int outsingle;
 
     /* rinex options {rover,base} */
     char rnxopt[2][256];
@@ -3320,10 +3298,10 @@ typedef struct // PACKED
 typedef struct
 {
     /** number of observation slots used */
-    uint32_t n;
+    int n;
 
     /** number of observation slots allocated */
-    uint32_t nmax;
+    int nmax;
 
     /* epoch flag (0:ok,1:power failure,>1:event flag) */
     int flag;
@@ -3342,28 +3320,28 @@ typedef struct
 typedef struct
 {
     /** Satellite number in RTKlib notation.  GPS: 1-32, GLONASS: 33-59, Galilleo: 60-89, SBAS: 90-95 */
-    int32_t sat;
+    int sat;
 
     /** IODE Issue of Data, Ephemeris (ephemeris version) */
-    int32_t iode;
+    int iode;
     
     /** IODC Issue of Data, Clock (clock version) */
-    int32_t iodc;
+    int iodc;
 
     /** SV accuracy (URA index) IRN-IS-200H p.97 */
-    int32_t sva;            
+    int sva;            
 
     /** SV health GPS/QZS (0:ok) */
-    int32_t svh;            
+    int svh;            
 
     /** GPS/QZS: gps week, GAL: galileo week */
-    int32_t week;
+    int week;
 
     /** GPS/QZS: code on L2. (00 = Invalid, 01 = P Code ON, 11 = C/A code ON, 11 = Invalid).  GAL/CMP: data sources */
-    int32_t code;
+    int code;
 
     /** GPS/QZS: L2 P data flag (indicates that the NAV data stream was commanded OFF on the P-code of the in-phase component of the L2 channel). CMP: nav type */
-    int32_t flag;
+    int flag;
 
     /** Time Of Ephemeris, ephemeris reference epoch in seconds within the week (s) */
     gtime_t toe;
@@ -3448,22 +3426,22 @@ typedef struct
 typedef struct
 {        
     /** Satellite number in RTKlib notation.  GPS: 1-32, GLONASS: 33-59, Galilleo: 60-89, SBAS: 90-95 */
-    int32_t sat;
+    int sat;
 
     /** IODE (0-6 bit of tb field) */
-    int32_t iode;
+    int iode;
 
     /** satellite frequency number */
-    int32_t frq;
+    int frq;
 
     /** satellite health */
-    int32_t svh;
+    int svh;
     
     /** satellite accuracy */
-    int32_t sva;
+    int sva;
     
     /** satellite age of operation */
-    int32_t age;
+    int age;
 
     /** Ephemeris reference epoch in seconds within the week in GPS time gpst (s) */
     gtime_t toe;
@@ -3494,16 +3472,16 @@ typedef struct
 typedef struct
 {
     /** receiption time - week */
-    int32_t week;
+    int week;
     
     /** reception time - tow */
     int tow;
 
     /** SBAS satellite PRN number */
-    int32_t prn;
+    int8_t prn;
 
     /** SBAS satellite receiver number */
-    int32_t rcv;
+    int8_t rcv;
 
     /** SBAS message (226bit) padded by 0 */
     uint8_t msg[29];
