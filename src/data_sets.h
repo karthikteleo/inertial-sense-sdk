@@ -2828,10 +2828,12 @@ PUSH_PACK_8
 #ifndef GPX_1
 
 /** time struct */
+#if 1
 typedef struct {
     time_t time;        /* time (s) expressed by standard time_t */
     double sec;         /* fraction of second under 1 s */
 } gtime_t;
+#endif
 
 typedef struct PACKED
 {
@@ -3037,11 +3039,14 @@ PUSH_PACK_1
 
 #endif
 
+#if 1
 typedef struct {        /* SNR mask type */
     int ena[2];         /* enable flag {rover,base} */
     double mask[NFREQ][9]; /* mask (dBHz) at 5,10,...85 deg */
 } snrmask_t;
+#endif
 
+#if 1
 typedef struct {        /* antenna parameter type */
     int sat;            /* satellite number (0:receiver) */
     char type[MAXANT];  /* antenna type */
@@ -3051,8 +3056,9 @@ typedef struct {        /* antenna parameter type */
     double var[NFREQ][19]; /* phase center variation (m) */
     /* el=90,85,...,0 or nadir=0,1,2,3,... (deg) */
 } pcv_t;
+#endif
 
-
+#if 1
 /** (DID_GPS_RTK_OPT) RTK processing options */
 typedef struct
 {
@@ -3238,11 +3244,13 @@ typedef struct
     /* ppp option */
     char pppopt[256];
 } prcopt_t;
+#endif
 
 typedef prcopt_t gps_rtk_opt_t;
 
 
 /** Raw satellite observation data */
+#if 1
 typedef struct // PACKED
 {
     /** Receiver local time approximately aligned to the GPS time system (GPST) */
@@ -3290,11 +3298,12 @@ typedef struct // PACKED
     /** reserved, for alignment */
     //uint8_t reserved;  ?????
 } obsd_t;
-
+#endif
 #define GPS_RAW_MESSAGE_BUF_SIZE    1000
 #define MAX_OBSERVATION_COUNT_IN_RTK_MESSAGE (GPS_RAW_MESSAGE_BUF_SIZE / sizeof(obsd_t))
 
 /** observation data */
+#if 1
 typedef struct
 {
     /** number of observation slots used */
@@ -3315,8 +3324,10 @@ typedef struct
     /** observation data buffer */
     obsd_t* data;
 } obs_t;
+#endif
 
 /** non-Glonass ephemeris data */
+#if 1
 typedef struct
 {
     /** Satellite number in RTKlib notation.  GPS: 1-32, GLONASS: 33-59, Galilleo: 60-89, SBAS: 90-95 */
@@ -3421,8 +3432,10 @@ typedef struct
     /** First derivative of mean motion n (second derivative of mean anomaly M), ndot for CNAV (rad/s/s). Not used. */
     double ndot;
 } eph_t;
+#endif
 
 /** Glonass ephemeris data */
+#if 1
 typedef struct
 {        
     /** Satellite number in RTKlib notation.  GPS: 1-32, GLONASS: 33-59, Galilleo: 60-89, SBAS: 90-95 */
@@ -3467,8 +3480,10 @@ typedef struct
     /** delay between L1 and L2 (s) */
     double dtaun;
 } geph_t;
+#endif
 
 /** SBAS message type */
+#if 1
 typedef struct
 {
     /** receiption time - week */
@@ -3489,8 +3504,10 @@ typedef struct
     /** reserved for alighment */
     //uint8_t reserved[3];
 } sbsmsg_t;
+#endif
 
 /** station parameter type */
+#if 1
 typedef struct
 {
     char name[MAXANT]; /* marker name */
@@ -3510,8 +3527,10 @@ typedef struct
     int glo_cp_align;   /* GLONASS code-phase alignment (0:no,1:yes) */
     double glo_cp_bias[4]; /* GLONASS code-phase biases {1C,1P,2C,2P} (m) */
 } sta_t;
+#endif
 
 /** almanac type */
+#if 1
 typedef struct
 {
     /** satellite number */
@@ -3559,6 +3578,7 @@ typedef struct
     /** SV clock parameters - af1 */
     double f1;
 } alm_t;
+#endif
 
 /** ionosphere model and utc parameters */
 typedef struct
