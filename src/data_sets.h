@@ -3510,15 +3510,6 @@ typedef struct
 #if 1
 typedef struct
 {
-    char name[MAXANT]; /* marker name */
-    char marker[MAXANT]; /* marker number */
-    char antdes[MAXANT]; /* antenna descriptor */
-    char antsno[MAXANT]; /* antenna serial number */
-    char rectype[MAXANT]; /* receiver type descriptor */
-    char recver[MAXANT]; /* receiver firmware version */
-    char recsno[MAXANT]; /* receiver serial number */
-    int antsetup;       /* antenna setup id */
-    int itrf;           /* ITRF realization year */
     int deltype;        /* antenna delta type (0:enu,1:xyz) */
     double pos[3];      /* station position (ecef) (m) */
     double vel[3];      /* station velocity (ecef) (m/s) */
@@ -3526,6 +3517,8 @@ typedef struct
     double hgt;         /* antenna height (m) */
     int glo_cp_align;   /* GLONASS code-phase alignment (0:no,1:yes) */
     double glo_cp_bias[4]; /* GLONASS code-phase biases {1C,1P,2C,2P} (m) */
+    /** station id */
+    int32_t stationId;
 } sta_t;
 #endif
 
@@ -3589,16 +3582,16 @@ typedef struct
     double ion_cmp[8];  /* BeiDou iono model parameters {a0,a1,a2,a3,b0,b1,b2,b3} */
     double ion_irn[8];  /* IRNSS iono model parameters {a0,a1,a2,a3,b0,b1,b2,b3} */
 
-    double utc_gps[4];  /* GPS delta-UTC parameters {A0,A1,T,W} */
-    double utc_glo[4];  /* GLONASS UTC GPS time parameters */
-    double utc_gal[4];  /* Galileo UTC GPS time parameters */
-    double utc_qzs[4];  /* QZS UTC GPS time parameters */
-    double utc_cmp[4];  /* BeiDou UTC parameters */
+    double utc_gps[8];  /* GPS delta-UTC parameters {A0,A1,T,W} */
+    double utc_glo[8];  /* GLONASS UTC GPS time parameters */
+    double utc_gal[8];  /* Galileo UTC GPS time parameters */
+    double utc_qzs[8];  /* QZS UTC GPS time parameters */
+    double utc_cmp[8];  /* BeiDou UTC parameters */
     double utc_irn[4];  /* IRNSS UTC parameters */
     double utc_sbs[4];  /* SBAS UTC parameters */
+    int glo_fcn[32];    /* GLONASS FCN + 8 */
 
     int32_t leaps;      /* leap seconds (s) */
-    
     alm_t alm;			/* almanac */
 } ion_model_utc_alm_t;
 
