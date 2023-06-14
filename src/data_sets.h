@@ -2972,6 +2972,130 @@ POP_PACK
 
 PUSH_PACK_1
 
+#ifndef GPX_1
+
+#ifndef __RTKLIB_EMBEDDED_DEFINES_H_
+
+#define MINPRNGPS   1                   /* min satellite PRN number of GPS */
+#define MAXPRNGPS   32                  /* max satellite PRN number of GPS */
+#define NSATGPS     (MAXPRNGPS-MINPRNGPS+1) /* number of GPS satellites */
+#define NSYSGPS     1
+
+#undef ENAGLO
+#define ENAGLO
+#ifdef ENAGLO
+#define MINPRNGLO   1                   /* min satellite slot number of GLONASS */
+#define MAXPRNGLO   27                  /* max satellite slot number of GLONASS */
+#define NSATGLO     (MAXPRNGLO-MINPRNGLO+1) /* number of GLONASS satellites */
+#define NSYSGLO     1
+#else
+#define MINPRNGLO   0
+#define MAXPRNGLO   0
+#define NSATGLO     0
+#define NSYSGLO     0
+#endif
+
+#define ENAGAL
+#ifdef ENAGAL
+#define MINPRNGAL   1                   /* min satellite PRN number of Galileo */
+#define MAXPRNGAL   36                  /* max satellite PRN number of Galileo */
+#define NSATGAL    (MAXPRNGAL-MINPRNGAL+1) /* number of Galileo satellites */
+#define NSYSGAL     1
+#else
+#define MINPRNGAL   0
+#define MAXPRNGAL   0
+#define NSATGAL     0
+#define NSYSGAL     0
+#endif
+
+//#define ENAQZS
+#ifdef ENAQZS
+#define MINPRNQZS   193                 /* min satellite PRN number of QZSS */
+#define MAXPRNQZS   202                 /* max satellite PRN number of QZSS */
+#define MINPRNQZS_S 183                 /* min satellite PRN number of QZSS L1S */
+#define MAXPRNQZS_S 191                 /* max satellite PRN number of QZSS L1S */
+#define NSATQZS     (MAXPRNQZS-MINPRNQZS+1) /* number of QZSS satellites */
+#define NSYSQZS     1
+#else
+#define MINPRNQZS   0
+#define MAXPRNQZS   0
+#define MINPRNQZS_S 0
+#define MAXPRNQZS_S 0
+#define NSATQZS     0
+#define NSYSQZS     0
+#endif
+
+#ifdef ENACMP
+#define MINPRNCMP   1                   /* min satellite sat number of BeiDou */
+#define MAXPRNCMP   46                  /* max satellite sat number of BeiDou */
+#define NSATCMP     (MAXPRNCMP-MINPRNCMP+1) /* number of BeiDou satellites */
+#define NSYSCMP     1
+#else
+#define MINPRNCMP   0
+#define MAXPRNCMP   0
+#define NSATCMP     0
+#define NSYSCMP     0
+#endif
+
+#define ENASBS
+
+#define MAXSUBFRMLEN 380
+#define MAXRAWLEN   16384  /* max length of receiver raw message */
+
+#define NFREQ       3      /* number of carrier frequencies */
+
+#ifdef ENAGLO
+#define NFREQGLO 2   /* number of carrier frequencies of GLONASS */
+#else
+#define NFREQGLO 0
+#endif
+
+#ifdef ENAGAL
+#define NFREQGAL 1
+#else
+#define NFREQGAL 0
+#endif
+
+#define NEXOBS      0           /* number of extended obs codes */
+#define MAXOBS      96          /* max number of obs in an epoch */
+#define HALF_MAXOBS (MAXOBS/2)
+#define MAXERRMSG   4096                /* max length of error/warning message */
+#define MAXANT      64                  /* max length of station name/antenna type */
+
+
+#ifdef ENASBS
+// sbas waas only satellites
+#define MINPRNSBS   120                 /* min satellite PRN number of SBAS */
+#define MAXPRNSBS   158                 /* max satellite PRN number of SBAS */
+#define NSATSBS     (MAXPRNSBS-MINPRNSBS+1) /* number of SBAS satellites */
+#define SBAS_EPHEMERIS_ARRAY_SIZE NSATSBS
+#else
+#define SBAS_EPHEMERIS_ARRAY_SIZE 0
+#endif
+
+#define NSATIRN     0
+#define NSATLEO     0
+
+#define MAXSAT      (NSATGPS+NSATGLO+NSATGAL+NSATQZS+NSATCMP+NSATIRN+NSATSBS+NSATLEO)
+
+#endif
+
+typedef struct {        /* SNR mask type */
+    int ena[2];         /* enable flag {rover,base} */
+    double mask[NFREQ][9]; /* mask (dBHz) at 5,10,...85 deg */
+} snrmask_t;
+
+typedef struct {        /* antenna parameter type */
+    int sat;            /* satellite number (0:receiver) */
+    char type[MAXANT];  /* antenna type */
+    char code[MAXANT];  /* serial number or satellite code */
+    gtime_t ts, te;      /* valid time start and end */
+    double off[NFREQ][3]; /* phase center offset e/n/u or x/y/z (m) */
+    double var[NFREQ][19]; /* phase center variation (m) */
+    /* el=90,85,...,0 or nadir=0,1,2,3,... (deg) */
+} pcv_t;
+#endif
+
 /** (DID_GPS_RTK_OPT) RTK processing options */
 typedef struct
 {
@@ -4779,48 +4903,6 @@ int ubxSys(int gnssID);
 
 #ifndef __RTKLIB_EMBEDDED_DEFINES_H_
 
-#undef ENAGLO
-#define ENAGLO
-
-#undef ENAGAL
-#define ENAGAL
-
-#undef ENAQZS
-//#define ENAQZS
-
-#undef ENASBS
-#define ENASBS
-
-#undef MAXSUBFRMLEN
-#define MAXSUBFRMLEN 152
-
-#undef MAXRAWLEN
-#define MAXRAWLEN 2048
-
-#undef NFREQ
-#define NFREQ 1
-
-#undef NFREQGLO
-#ifdef ENAGLO
-#define NFREQGLO 1
-#else
-#define NFREQGLO 0
-#endif
-
-#undef NFREQGAL
-#ifdef ENAGAL
-#define NFREQGAL 1
-#else
-#define NFREQGAL 0
-#endif
-
-#undef NEXOBS
-#define NEXOBS 0
-
-#undef MAXOBS
-#define MAXOBS 56               // Also defined inside rtklib_defines.h
-#define HALF_MAXOBS (MAXOBS/2)
-
 #undef NUMSATSOL
 #define NUMSATSOL 22
 
@@ -4852,59 +4934,6 @@ int ubxSys(int gnssID);
 
 #ifndef RTKLIB_H
 
-#define MINPRNGPS   1                   /* min satellite PRN number of GPS */
-#define MAXPRNGPS   32                  /* max satellite PRN number of GPS */
-#define NSATGPS     (MAXPRNGPS-MINPRNGPS+1) /* number of GPS satellites */
-#define NSYSGPS     1
-
-#ifdef ENAGLO
-#define MINPRNGLO   1                   /* min satellite slot number of GLONASS */
-#define MAXPRNGLO   27                  /* max satellite slot number of GLONASS */
-#define NSATGLO     (MAXPRNGLO-MINPRNGLO+1) /* number of GLONASS satellites */
-#define NSYSGLO     1
-#else
-#define MINPRNGLO   0
-#define MAXPRNGLO   0
-#define NSATGLO     0
-#define NSYSGLO     0
-#endif
-#ifdef ENAGAL
-#define MINPRNGAL   1                   /* min satellite PRN number of Galileo */
-#define MAXPRNGAL   36                  /* max satellite PRN number of Galileo */
-#define NSATGAL    (MAXPRNGAL-MINPRNGAL+1) /* number of Galileo satellites */
-#define NSYSGAL     1
-#else
-#define MINPRNGAL   0
-#define MAXPRNGAL   0
-#define NSATGAL     0
-#define NSYSGAL     0
-#endif
-#ifdef ENAQZS
-#define MINPRNQZS   193                 /* min satellite PRN number of QZSS */
-#define MAXPRNQZS   202                 /* max satellite PRN number of QZSS */
-#define MINPRNQZS_S 183                 /* min satellite PRN number of QZSS L1S */
-#define MAXPRNQZS_S 191                 /* max satellite PRN number of QZSS L1S */
-#define NSATQZS     (MAXPRNQZS-MINPRNQZS+1) /* number of QZSS satellites */
-#define NSYSQZS     1
-#else
-#define MINPRNQZS   0
-#define MAXPRNQZS   0
-#define MINPRNQZS_S 0
-#define MAXPRNQZS_S 0
-#define NSATQZS     0
-#define NSYSQZS     0
-#endif
-#ifdef ENACMP
-#define MINPRNCMP   1                   /* min satellite sat number of BeiDou */
-#define MAXPRNCMP   46                  /* max satellite sat number of BeiDou */
-#define NSATCMP     (MAXPRNCMP-MINPRNCMP+1) /* number of BeiDou satellites */
-#define NSYSCMP     1
-#else
-#define MINPRNCMP   0
-#define MAXPRNCMP   0
-#define NSATCMP     0
-#define NSYSCMP     0
-#endif
 #ifdef ENAIRN
 #define MINPRNIRN   1                   /* min satellite sat number of IRNSS */
 #define MAXPRNIRN   14                  /* max satellite sat number of IRNSS */
