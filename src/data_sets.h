@@ -2974,13 +2974,19 @@ PUSH_PACK_1
 
 #ifndef __RTKLIB_EMBEDDED_DEFINES_H_
 
+#define ENAGAL
+#define ENAGLO
+#define ENAQZS
+#define ENACMP
+#define ENASBS
+
+#define NFREQ       3      /* number of carrier frequencies */
+
 #define MINPRNGPS   1                   /* min satellite PRN number of GPS */
 #define MAXPRNGPS   32                  /* max satellite PRN number of GPS */
 #define NSATGPS     (MAXPRNGPS-MINPRNGPS+1) /* number of GPS satellites */
 #define NSYSGPS     1
 
-#undef ENAGLO
-#define ENAGLO
 #ifdef ENAGLO
 #define MINPRNGLO   1                   /* min satellite slot number of GLONASS */
 #define MAXPRNGLO   27                  /* max satellite slot number of GLONASS */
@@ -2993,7 +2999,6 @@ PUSH_PACK_1
 #define NSYSGLO     0
 #endif
 
-#define ENAGAL
 #ifdef ENAGAL
 #define MINPRNGAL   1                   /* min satellite PRN number of Galileo */
 #define MAXPRNGAL   36                  /* max satellite PRN number of Galileo */
@@ -3006,7 +3011,6 @@ PUSH_PACK_1
 #define NSYSGAL     0
 #endif
 
-//#define ENAQZS
 #ifdef ENAQZS
 #define MINPRNQZS   193                 /* min satellite PRN number of QZSS */
 #define MAXPRNQZS   202                 /* max satellite PRN number of QZSS */
@@ -3035,24 +3039,14 @@ PUSH_PACK_1
 #define NSYSCMP     0
 #endif
 
-#define ENASBS
-
 #define MAXSUBFRMLEN 380
 #define MAXRAWLEN   16384  /* max length of receiver raw message */
 
-#define NFREQ       3      /* number of carrier frequencies */
-
-// #ifdef ENAGLO
-// #define NFREQGLO 2   /* number of carrier frequencies of GLONASS */
-// #else
-// #define NFREQGLO 0
-// #endif
-
-// #ifdef ENAGAL
-// #define NFREQGAL 1
-// #else
-// #define NFREQGAL 0
-// #endif
+#ifdef ENAGLO
+#define NFREQGLO 2   /* number of carrier frequencies of GLONASS */
+#else
+#define NFREQGLO 0
+#endif
 
 #define NEXOBS      0           /* number of extended obs codes */
 #define MAXOBS      96          /* max number of obs in an epoch */
@@ -3060,6 +3054,8 @@ PUSH_PACK_1
 #define MAXERRMSG   4096                /* max length of error/warning message */
 #define MAXANT      64                  /* max length of station name/antenna type */
 
+#define MAXPREOBS			_MAX(100,MAXOBS)
+#define HALF_MAXPREOBS		(MAXPREOBS/2)
 
 #ifdef ENASBS
 // sbas waas only satellites
@@ -4905,10 +4901,8 @@ int ubxSys(int gnssID);
 
 #ifndef __RTKLIB_EMBEDDED_DEFINES_H_
 
-#undef NUMSATSOL
-#define NUMSATSOL 22
+#define NUMSATSOL 50
 
-#undef MAXERRMSG
 #define MAXERRMSG 0
 
 #ifdef ENASBS
