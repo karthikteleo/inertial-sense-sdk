@@ -3044,17 +3044,17 @@ PUSH_PACK_1
 
 #define NFREQ       3      /* number of carrier frequencies */
 
-#ifdef ENAGLO
-#define NFREQGLO 2   /* number of carrier frequencies of GLONASS */
-#else
-#define NFREQGLO 0
-#endif
+// #ifdef ENAGLO
+// #define NFREQGLO 2   /* number of carrier frequencies of GLONASS */
+// #else
+// #define NFREQGLO 0
+// #endif
 
-#ifdef ENAGAL
-#define NFREQGAL 1
-#else
-#define NFREQGAL 0
-#endif
+// #ifdef ENAGAL
+// #define NFREQGAL 1
+// #else
+// #define NFREQGAL 0
+// #endif
 
 #define NEXOBS      0           /* number of extended obs codes */
 #define MAXOBS      96          /* max number of obs in an epoch */
