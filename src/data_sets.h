@@ -3129,9 +3129,6 @@ typedef struct
     /** GPS AR mode (0:off,1:on) */
     int32_t gpsmodear;
 
-    /** SBAS AR mode (0:off,1:on) */
-    int32_t sbsmodear;
-
     /** BeiDou AR mode (0:off,1:on) */
     int32_t bdsmodear;
 
@@ -3165,14 +3162,24 @@ typedef struct
     /** max iteration to resolve ambiguity */
     int32_t armaxiter;
 
+    int32_t ionoopt;        /* ionosphere option (IONOOPT_???) */
+    int32_t tropopt;        /* troposphere option (TROPOPT_???) */
+
     /** dynamics model (0:none,1:velociy,2:accel) */
     int32_t dynamics;
+
+    int32_t tidecorr;       /* earth tide correction (0:off,1:solid,2:solid+otl+pole) */
 
     /** number of filter iteration */
     int32_t niter;
 
+    int32_t codesmooth;     /* code smoothing window size (0:none) */
+
     /** interpolate reference obs (for post mission) */
     int32_t intpref;
+
+    int32_t sbascorr;       /* SBAS correction options */
+    int32_t sbassatsel;     /* SBAS satellite selection (0:all) */
 
     /** rover position for fixed mode */
     int32_t rovpos;
@@ -3229,7 +3236,7 @@ typedef struct
     double maxnis;
 
     /** reject threshold of gdop */
-    double maxgdop;
+    // double maxgdop;
 
     /** baseline length constraint {const,sigma before fix, sigma after fix} (m) */
     double baseline[2];
