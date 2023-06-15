@@ -2972,8 +2972,6 @@ POP_PACK
 
 PUSH_PACK_1
 
-#ifndef GPX_1
-
 #ifndef __RTKLIB_EMBEDDED_DEFINES_H_
 
 #define MINPRNGPS   1                   /* min satellite PRN number of GPS */
@@ -3071,7 +3069,7 @@ PUSH_PACK_1
 #define SBAS_EPHEMERIS_ARRAY_SIZE NSATSBS
 #else
 #define SBAS_EPHEMERIS_ARRAY_SIZE 0
-#endif
+#endif // ENASBS
 
 #define NSATIRN     0
 #define NSATLEO     0
@@ -3094,7 +3092,6 @@ typedef struct {        /* antenna parameter type */
     double var[NFREQ][19]; /* phase center variation (m) */
     /* el=90,85,...,0 or nadir=0,1,2,3,... (deg) */
 } pcv_t;
-#endif
 
 /** (DID_GPS_RTK_OPT) RTK processing options */
 typedef struct
@@ -4885,8 +4882,6 @@ void julianToDate(double julian, int32_t* year, int32_t* month, int32_t* day, in
 double gpsToJulian(int32_t gpsWeek, int32_t gpsMilliseconds, int32_t leapSeconds);
 
 
-#ifndef GPX_1
-
 #ifndef RTKLIB_H
 #define SYS_NONE    0x00                /* navigation system: none */
 #define SYS_GPS     0x01                /* navigation system: GPS */
@@ -4976,7 +4971,7 @@ int ubxSys(int gnssID);
 #endif
 #endif
 
-#endif
+#define MAXSAT      (NSATGPS+NSATGLO+NSATGAL+NSATQZS+NSATCMP+NSATIRN+NSATSBS+NSATLEO)
 
 #endif
 
