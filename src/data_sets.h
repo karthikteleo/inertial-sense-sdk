@@ -3051,7 +3051,7 @@ PUSH_PACK_1
 #define NEXOBS      0           /* number of extended obs codes */
 #define MAXOBS      96          /* max number of obs in an epoch */
 #define HALF_MAXOBS (MAXOBS/2)
-#define MAXERRMSG   4096                /* max length of error/warning message */
+#define MAXERRMSG   0                /* max length of error/warning message */
 #define MAXANT      64                  /* max length of station name/antenna type */
 
 #define MAXPREOBS			_MAX(100,MAXOBS)
@@ -4901,9 +4901,7 @@ int ubxSys(int gnssID);
 
 #ifndef __RTKLIB_EMBEDDED_DEFINES_H_
 
-#define NUMSATSOL 50
-
-#define MAXERRMSG 0
+// #define NUMSATSOL 50             // Comment out to disable reduced satellite array and satellite indexing arrays.
 
 #ifdef ENASBS
 
