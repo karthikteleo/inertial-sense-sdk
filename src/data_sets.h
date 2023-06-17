@@ -3316,7 +3316,7 @@ typedef struct // PACKED
     float D[NFREQ + NEXOBS];
 
     /* time is valid (Valid GNSS fix) for time mark */
-    int timevalid;
+    int32_t timevalid;
 
     /* time of event (GPST) */
     gtime_t eventime;
@@ -3341,18 +3341,19 @@ typedef struct // PACKED
 typedef struct
 {
     /** number of observation slots used */
-    uint32_t n;
+    int32_t n;
 
     /** number of observation slots allocated */
-    uint32_t nmax;
+    int32_t nmax;
+
     /* epoch flag (0:ok,1:power failure,>1:event flag) */
-    int flag;
+    int32_t flag;
 
     /* count of rcv event */
-    int rcvcount;
+    int32_t rcvcount;
 
     /* time mark count */
-    int tmcount;
+    int32_t tmcount;
 
     /** observation data buffer */
     obsd_t* data;
