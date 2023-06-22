@@ -2981,6 +2981,8 @@ PUSH_PACK_1
 #define ENASBS
 
 #define NFREQ       3      /* number of carrier frequencies */
+#define NFREQ_USED  2      /* number of used frequencies. E.g. if L1 and L5 are used but not L2, then NFREQ is 3 but actually used frequencies are 2 */                          
+
 
 #define MINPRNGPS   1                   /* min satellite PRN number of GPS */
 #define MAXPRNGPS   32                  /* max satellite PRN number of GPS */
@@ -3064,6 +3066,7 @@ PUSH_PACK_1
 #define NSATSBS     (MAXPRNSBS-MINPRNSBS+1) /* number of SBAS satellites */
 #define SBAS_EPHEMERIS_ARRAY_SIZE NSATSBS
 #else
+#define NSATSBS     0
 #define SBAS_EPHEMERIS_ARRAY_SIZE 0
 #endif // ENASBS
 
