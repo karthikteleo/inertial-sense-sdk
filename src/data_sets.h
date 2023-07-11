@@ -2980,8 +2980,8 @@ PUSH_PACK_1
 #define ENACMP
 #define ENASBS
 
-#define NFREQ       3      /* number of carrier frequencies */
-#define NFREQ_USED  2      /* number of used frequencies. E.g. if L1 and L5 are used but not L2, then NFREQ is 3 but actually used frequencies are 2 */                          
+#define NFREQ       2      /* number of carrier frequencies */
+//#define NFREQ_USED  2      /* number of used frequencies. E.g. if L1 and L5 are used but not L2, then NFREQ is 3 but actually used frequencies are 2 */                          
 
 
 #define MINPRNGPS   1                   /* min satellite PRN number of GPS */
@@ -3051,13 +3051,11 @@ PUSH_PACK_1
 #endif
 
 #define NEXOBS      0           /* number of extended obs codes */
-#define MAXOBS      96          /* max number of obs in an epoch */
-#define HALF_MAXOBS (MAXOBS/2)
-#define MAXERRMSG   0                /* max length of error/warning message */
-#define MAXANT      64                  /* max length of station name/antenna type */
+#define MAXOBS      25          /* max number of obs (satellites) in an epoch */ // Note: total number of observed satellites for rover + base is (2 * MAXOBS)
+#define MAXERRMSG   0           /* max length of error/warning message */
+#define MAXANT      64          /* max length of station name/antenna type */
 
-#define MAXPREOBS			_MAX(100,MAXOBS)
-#define HALF_MAXPREOBS		(MAXPREOBS/2)
+#define MAXPREOBS  _MAX(40, MAXOBS)  // Note: total rover + base is (2 * MAXPREOBS)
 
 #ifdef ENASBS
 // sbas waas only satellites
